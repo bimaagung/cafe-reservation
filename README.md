@@ -1,4 +1,4 @@
-# cafe-reservation
+# Cafe Reservation
 Project learning go with clean-architecture, this concept is case simulation table resevation and order menu in cafe   
 
 ## Project References & Credits

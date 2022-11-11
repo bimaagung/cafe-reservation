@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/bimaagung/cafe-reservation/config"
-	"github.com/bimaagung/cafe-reservation/entity"
+	"github.com/bimaagung/cafe-reservation/domain"
 )
 
 func init(){
@@ -11,5 +11,5 @@ func init(){
 
 func main() {
 	database := config.NewPostgresDB()
-	database.AutoMigrate(&entity.Menu{})
+	database.AutoMigrate(&domain.Menu{})
 }

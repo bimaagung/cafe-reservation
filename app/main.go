@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/bimaagung/cafe-reservation/config"
-	"github.com/bimaagung/cafe-reservation/controller"
 	"github.com/bimaagung/cafe-reservation/exception"
-	"github.com/bimaagung/cafe-reservation/repository"
-	"github.com/bimaagung/cafe-reservation/usecase"
+	"github.com/bimaagung/cafe-reservation/menu/delivery/http"
+	"github.com/bimaagung/cafe-reservation/menu/repository/postgres"
+	"github.com/bimaagung/cafe-reservation/menu/usecase"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 )
@@ -17,9 +17,9 @@ func init(){
 func main() {
 	dbPostgres := config.NewPostgresDB()
 
-	menuRepository := repository.NewConnectDB(dbPostgres)
+	menuRepository := postgres.NewConnectDB(dbPostgres)
 	menuUseCase := usecase.NewMenuUC(&menuRepository)
-	menuController := controller.NewMenuController(&menuUseCase)
+	menuController := http.NewMenuController(&menuUseCase)
 
 	app := fiber.New(
 		fiber.Config{

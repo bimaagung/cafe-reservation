@@ -1,18 +1,18 @@
-package controller
+package http
 
 import (
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/exception"
-	"github.com/bimaagung/cafe-reservation/model"
-	"github.com/bimaagung/cafe-reservation/usecase"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
 type Menu struct {
-	MenuUseCase usecase.MenuUseCase
+	MenuUseCase domain.MenuUseCase
 }
 
-func NewMenuController(menuUseCase *usecase.MenuUseCase) Menu {
+func NewMenuController(menuUseCase *domain.MenuUseCase) Menu {
 	return Menu{MenuUseCase: *menuUseCase}
 }
 
@@ -23,14 +23,14 @@ func (controller *Menu) Route(app *fiber.App) {
 }
 
 func (controller *Menu) Insert(c *fiber.Ctx) error {
-	request := model.Menu{}
+	request := domain.Menu{}
 	err := c.BodyParser(&request)
 	request.Id = uuid.New().String()
 
 	exception.Error(err)
 
 	response := controller.MenuUseCase.Add(request)
-	return c.JSON(model.SuccessRes{
+	return c.JSON(domain.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: response,
@@ -41,7 +41,7 @@ func (controller *Menu) Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	response := controller.MenuUseCase.Delete(id)
-	return c.JSON(model.SuccessRes{
+	return c.JSON(domain.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: response,
@@ -50,7 +50,7 @@ func (controller *Menu) Delete(c *fiber.Ctx) error {
 
 func (controller *Menu) GetList(c *fiber.Ctx) error {
 	response := controller.MenuUseCase.GetList()
-	return c.JSON(model.SuccessRes{
+	return c.JSON(domain.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: response,

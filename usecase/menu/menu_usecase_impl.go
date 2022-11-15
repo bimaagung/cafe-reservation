@@ -3,18 +3,20 @@ package usecase
 import (
 	"time"
 
-	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/exception"
+	repository "github.com/bimaagung/cafe-reservation/repository/postgres/menu"
+
+	"github.com/bimaagung/cafe-reservation/models/domain"
 )
 
-func NewMenuUC(menuRepository *domain.MenuRepository) domain.MenuUseCase {
+func NewMenuUC(menuRepository *repository.MenuRepository) MenuUseCase {
 	return &menuUseCaseImpl{
 		MenuRepository: *menuRepository,
 	} 
 }
 
 type menuUseCaseImpl struct {
-	MenuRepository domain.MenuRepository
+	MenuRepository repository.MenuRepository
 }
 
 func (useCase *menuUseCaseImpl) Add(request domain.Menu)(response domain.Menu) {

@@ -1,4 +1,4 @@
-package domain
+package web
 
 type ErrorRes struct {
 	Status  string      `json:"status"`

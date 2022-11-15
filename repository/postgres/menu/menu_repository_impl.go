@@ -1,12 +1,12 @@
-package postgres
+package repository
 
 import (
-	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/exception"
+	"github.com/bimaagung/cafe-reservation/models/domain"
 	"gorm.io/gorm"
 )
 
-func NewConnectDB(database *gorm.DB) domain.MenuRepository {
+func NewConnectDB(database *gorm.DB) MenuRepository {
 	return &postgresMenuRepository{
 		DB: database,
 	} 

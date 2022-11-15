@@ -1,18 +1,19 @@
-package http
+package controller
 
 import (
-	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/exception"
-
+	"github.com/bimaagung/cafe-reservation/models/domain"
+	"github.com/bimaagung/cafe-reservation/models/web"
+	usecase "github.com/bimaagung/cafe-reservation/usecase/menu"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
 type Menu struct {
-	MenuUseCase domain.MenuUseCase
+	MenuUseCase usecase.MenuUseCase
 }
 
-func NewMenuController(menuUseCase *domain.MenuUseCase) Menu {
+func NewMenuController(menuUseCase *usecase.MenuUseCase) Menu {
 	return Menu{MenuUseCase: *menuUseCase}
 }
 
@@ -30,7 +31,7 @@ func (controller *Menu) Insert(c *fiber.Ctx) error {
 	exception.Error(err)
 
 	response := controller.MenuUseCase.Add(request)
-	return c.JSON(domain.SuccessRes{
+	return c.JSON(web.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: response,
@@ -41,7 +42,7 @@ func (controller *Menu) Delete(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	response := controller.MenuUseCase.Delete(id)
-	return c.JSON(domain.SuccessRes{
+	return c.JSON(web.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: response,
@@ -50,7 +51,7 @@ func (controller *Menu) Delete(c *fiber.Ctx) error {
 
 func (controller *Menu) GetList(c *fiber.Ctx) error {
 	response := controller.MenuUseCase.GetList()
-	return c.JSON(domain.SuccessRes{
+	return c.JSON(web.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: response,

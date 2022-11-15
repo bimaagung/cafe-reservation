@@ -2,7 +2,6 @@ package controller
 
 import (
 	"github.com/bimaagung/cafe-reservation/exception"
-	"github.com/bimaagung/cafe-reservation/models/domain"
 	"github.com/bimaagung/cafe-reservation/models/web"
 	usecase "github.com/bimaagung/cafe-reservation/usecase/menu"
 	"github.com/gofiber/fiber/v2"
@@ -19,12 +18,13 @@ func NewMenuController(menuUseCase *usecase.MenuUseCase) Menu {
 
 func (controller *Menu) Route(app *fiber.App) {
 	app.Get("/api/menu", controller.GetList)
+	app.Get("/api/menu/:id", controller.GetById)
 	app.Post("/api/menu", controller.Insert)
 	app.Delete("/api/menu/:id", controller.Delete)
 }
 
 func (controller *Menu) Insert(c *fiber.Ctx) error {
-	request := domain.Menu{}
+	request := web.MenuReq{}
 	err := c.BodyParser(&request)
 	request.Id = uuid.New().String()
 
@@ -56,4 +56,16 @@ func (controller *Menu) GetList(c *fiber.Ctx) error {
 		Message: "success",
 		Data: response,
 	})
+}
+
+func (controller *Menu) GetById(c *fiber.Ctx) error {
+	 id := c.Params("id")
+
+	 response := controller.MenuUseCase.GetById(id)
+
+	 return c.JSON(web.SuccessRes{
+		Status: "ok",
+		Message: "success",
+		Data: response,
+	 })
 }

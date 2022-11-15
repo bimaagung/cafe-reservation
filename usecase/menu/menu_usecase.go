@@ -1,11 +1,12 @@
 package usecase
 
 import (
-	"github.com/bimaagung/cafe-reservation/models/domain"
+	"github.com/bimaagung/cafe-reservation/models/web"
 )
 
 type MenuUseCase interface {
-	GetList() (response []domain.Menu)
-	Add(request domain.Menu) (response domain.Menu)
+	GetList() (response []web.MenuRes)
+	GetById(id string) (response web.MenuRes)
+	Add(request web.MenuReq) (response web.MenuRes)
 	Delete(id string) bool
 }

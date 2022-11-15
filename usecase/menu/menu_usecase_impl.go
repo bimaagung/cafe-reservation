@@ -7,6 +7,7 @@ import (
 	repository "github.com/bimaagung/cafe-reservation/repository/postgres/menu"
 
 	"github.com/bimaagung/cafe-reservation/models/domain"
+	"github.com/bimaagung/cafe-reservation/models/web"
 )
 
 func NewMenuUC(menuRepository *repository.MenuRepository) MenuUseCase {
@@ -19,7 +20,7 @@ type menuUseCaseImpl struct {
 	MenuRepository repository.MenuRepository
 }
 
-func (useCase *menuUseCaseImpl) Add(request domain.Menu)(response domain.Menu) {
+func (useCase *menuUseCaseImpl) Add(request web.MenuReq)(response web.MenuRes) {
 
 	menu := domain.Menu {
 		Id: request.Id,
@@ -34,13 +35,13 @@ func (useCase *menuUseCaseImpl) Add(request domain.Menu)(response domain.Menu) {
 
 	if (getName != domain.Menu{}) {
 		panic(exception.NotFoundError{
-			Message: "category is already in use",
+			Message: "menu is already in use",
 		})
 	}
 
 	useCase.MenuRepository.Add(menu)
 
-	response = domain.Menu {
+	response = web.MenuRes {
 		Id: menu.Id,
 		Name: menu.Name,
 		Price: menu.Price,
@@ -58,7 +59,7 @@ func (useCase *menuUseCaseImpl) Delete(id string) bool{
 	
 	if (getById == domain.Menu{}) {
 		panic(exception.ClientError{
-			Message: "category not found",
+			Message: "menu not found",
 		})
 	}
 
@@ -68,13 +69,13 @@ func (useCase *menuUseCaseImpl) Delete(id string) bool{
 	return response
 }
 
-func (useCase *menuUseCaseImpl) GetList() (response []domain.Menu){
-	var menus []domain.Menu
+func (useCase *menuUseCaseImpl) GetList() (response []web.MenuRes){
+	var menus []web.MenuRes
 
 	menu := useCase.MenuRepository.GetList()
 	
 	for _, v := range menu {
-		  menus = append(menus, domain.Menu{
+		  menus = append(menus, web.MenuRes{
 			Id: v.Id,
 			Name: v.Name,
 			Price: v.Price,
@@ -86,4 +87,26 @@ func (useCase *menuUseCaseImpl) GetList() (response []domain.Menu){
 	
 
 	return menus
+}
+
+func (useCase *menuUseCaseImpl) GetById(id string) (response web.MenuRes) {
+	
+	menu := useCase.MenuRepository.GetById(id)
+	
+	if (menu == domain.Menu{}) {
+		panic(exception.ClientError{
+			Message: "menu not found",
+		})
+	}
+
+	response = web.MenuRes{
+		Id: menu.Id,
+		Name: menu.Name,
+		Price: menu.Price,
+		Stock: menu.Stock,
+		CreatedAt: menu.CreatedAt,
+		UpdatedAt: menu.UpdatedAt,
+	} 
+	
+	return response
 }

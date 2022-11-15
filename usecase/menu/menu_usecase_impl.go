@@ -110,3 +110,34 @@ func (useCase *menuUseCaseImpl) GetById(id string) (response web.MenuRes) {
 	
 	return response
 }
+
+func (useCase *menuUseCaseImpl) Update(id string, request web.MenuReq)(response web.MenuRes) {
+
+	menuReq :=  domain.Menu{
+		Name: request.Name,
+		Price: request.Price,
+		Stock: request.Stock,
+	}
+
+	menu := useCase.MenuRepository.GetById(id)
+
+	if(menu == domain.Menu{}) {
+		panic(exception.ClientError{
+			Message: "menu not found",
+		})
+	}
+
+
+	useCase.MenuRepository.Update(id, menuReq)
+
+	response = web.MenuRes{
+		Id: id,
+		Name: menuReq.Name,
+		Price: menuReq.Price,
+		Stock: menuReq.Stock,
+		CreatedAt: menuReq.CreatedAt,
+		UpdatedAt: menu.UpdatedAt,
+	}
+
+	return response
+}

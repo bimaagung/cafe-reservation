@@ -20,6 +20,7 @@ func (controller *Menu) Route(app *fiber.App) {
 	app.Get("/api/menu", controller.GetList)
 	app.Get("/api/menu/:id", controller.GetById)
 	app.Post("/api/menu", controller.Insert)
+	app.Put("/api/menu/:id", controller.Update)
 	app.Delete("/api/menu/:id", controller.Delete)
 }
 
@@ -68,4 +69,20 @@ func (controller *Menu) GetById(c *fiber.Ctx) error {
 		Message: "success",
 		Data: response,
 	 })
+}
+
+func (controller *Menu) Update(c *fiber.Ctx) error {
+	request := web.MenuReq{}
+	err := c.BodyParser(&request)
+	id := c.Params("id")
+
+	exception.Error(err)
+
+	response := controller.MenuUseCase.Update(id, request)
+
+	return c.JSON(web.SuccessRes{
+		Status: "ok",
+		Message: "success",
+		Data: response,
+	})
 }

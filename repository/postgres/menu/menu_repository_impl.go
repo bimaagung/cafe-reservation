@@ -44,3 +44,8 @@ func (repository *postgresMenuRepository) GetList() []domain.Menu {
 	exception.Error(result.Error)
 	return menu
 }
+
+func (repository *postgresMenuRepository) Update(id string, menu domain.Menu) {
+	result := repository.DB.Where("id = ?", id).Updates(&menu)
+	exception.Error(result.Error)
+}

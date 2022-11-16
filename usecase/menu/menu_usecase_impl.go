@@ -1,36 +1,43 @@
 package usecase
 
 import (
-	"time"
+	"strings"
 
 	"github.com/bimaagung/cafe-reservation/exception"
 	repository "github.com/bimaagung/cafe-reservation/repository/postgres/menu"
 
 	"github.com/bimaagung/cafe-reservation/models/domain"
 	"github.com/bimaagung/cafe-reservation/models/web"
+	"github.com/bimaagung/cafe-reservation/validation"
 )
 
+// menerima repository dan disimpan ke struct menuUseCase
 func NewMenuUC(menuRepository *repository.MenuRepository) MenuUseCase {
 	return &menuUseCaseImpl{
 		MenuRepository: *menuRepository,
 	} 
 }
 
+
+// tersimpan repository
 type menuUseCaseImpl struct {
 	MenuRepository repository.MenuRepository
 }
 
-func (useCase *menuUseCaseImpl) Add(request web.MenuReq)(response web.MenuRes) {
+func (useCase *menuUseCaseImpl) Add(request web.MenuReq, urlFile string)(response web.MenuRes) {
+	
+	validation.MenuPayloadValidator(request)
 
+	// memindahkan dari request model ke entity/domain Menu
 	menu := domain.Menu {
 		Id: request.Id,
-		Name: request.Name,
+		Name: strings.ToUpper(request.Name),
+		Url: urlFile,
 		Price: request.Price,
 		Stock: request.Stock,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
 	}
 
+	// validasi menu apabila menu sudah ada
 	getName := useCase.MenuRepository.GetByName(menu.Name)
 
 	if (getName != domain.Menu{}) {
@@ -39,6 +46,7 @@ func (useCase *menuUseCaseImpl) Add(request web.MenuReq)(response web.MenuRes) {
 		})
 	}
 
+	// disimpan ke database
 	useCase.MenuRepository.Add(menu)
 
 	response = web.MenuRes {
@@ -46,6 +54,7 @@ func (useCase *menuUseCaseImpl) Add(request web.MenuReq)(response web.MenuRes) {
 		Name: menu.Name,
 		Price: menu.Price,
 		Stock: menu.Stock,
+		Url: menu.Url,
 		CreatedAt: menu.CreatedAt,
 		UpdatedAt: menu.UpdatedAt,
 	}
@@ -114,7 +123,7 @@ func (useCase *menuUseCaseImpl) GetById(id string) (response web.MenuRes) {
 func (useCase *menuUseCaseImpl) Update(id string, request web.MenuReq)(response web.MenuRes) {
 
 	menuReq :=  domain.Menu{
-		Name: request.Name,
+		Name: strings.ToUpper(request.Name),
 		Price: request.Price,
 		Stock: request.Stock,
 	}
@@ -130,6 +139,8 @@ func (useCase *menuUseCaseImpl) Update(id string, request web.MenuReq)(response 
 
 	useCase.MenuRepository.Update(id, menuReq)
 
+	validation.MenuPayloadValidator(request)
+	
 	response = web.MenuRes{
 		Id: id,
 		Name: menuReq.Name,

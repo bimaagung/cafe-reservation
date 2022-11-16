@@ -12,6 +12,7 @@ type Menu struct {
 	Name  string  
 	Price int64 
 	Stock int 
+	Url string
 	CreatedAt time.Time 
 	UpdatedAt time.Time 
 	DeletedAt gorm.DeletedAt 

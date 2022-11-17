@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/bimaagung/cafe-reservation/exception"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -23,10 +24,11 @@ func MinioConnection(bucketName string) (*minio.Client, error) {
 
 	if errInit != nil {
 		log.Fatalln(errInit)
+		exception.Error(errInit.Error())
 	}
 
 	log.Printf("%#v\n", minioClient) // minioClient is now setup
-	
+
 	location := "us-east-1"
 
 	// Create a bucket at region 'us-east-1' with object locking enabled.
@@ -37,6 +39,7 @@ func MinioConnection(bucketName string) (*minio.Client, error) {
             log.Printf("We already own %s\n", bucketName)
         } else {
             log.Fatalln(err)
+			exception.Error(err.Error())
         }
 
 	} else {

@@ -1,4 +1,4 @@
-package repository
+package menurepository
 
 import (
 	"github.com/bimaagung/cafe-reservation/exception"

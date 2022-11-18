@@ -1,4 +1,4 @@
-package usecase
+package menuusecase
 
 import (
 	"github.com/bimaagung/cafe-reservation/models/web"

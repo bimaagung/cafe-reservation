@@ -11,5 +11,5 @@ func init(){
 
 func main() {
 	database := config.NewPostgresDB()
-	database.AutoMigrate(&domain.Menu{})
+	database.AutoMigrate(&domain.Menu{}, &domain.User{})
 }

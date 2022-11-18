@@ -5,7 +5,7 @@ import (
 	"log"
 	"mime/multipart"
 
-	"github.com/bimaagung/cafe-reservation/exception"
+	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/minio/minio-go/v7"
 )
 

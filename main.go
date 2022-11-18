@@ -1,32 +1,37 @@
 package main
 
 import (
-	"github.com/bimaagung/cafe-reservation/config"
-	controller "github.com/bimaagung/cafe-reservation/controller/menu"
-	"github.com/bimaagung/cafe-reservation/exception"
-	menurepository "github.com/bimaagung/cafe-reservation/repository/postgres/menu"
-	userrepository "github.com/bimaagung/cafe-reservation/repository/postgres/user"
-	menuusecase "github.com/bimaagung/cafe-reservation/usecase/menu"
-	userusecase "github.com/bimaagung/cafe-reservation/usecase/user"
-
+	"github.com/bimaagung/cafe-reservation/pkg/dotenv"
+	postgresdb "github.com/bimaagung/cafe-reservation/pkg/postgres"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
+
+	// menu
+	menucontroller "github.com/bimaagung/cafe-reservation/menu/controller"
+	menurepository "github.com/bimaagung/cafe-reservation/menu/repository"
+	menuusecase "github.com/bimaagung/cafe-reservation/menu/usecase"
+	"github.com/bimaagung/cafe-reservation/utils/exception"
+
+	// user
+	usercontroller "github.com/bimaagung/cafe-reservation/user/controller"
+	userrepository "github.com/bimaagung/cafe-reservation/user/repository"
+	userusecase "github.com/bimaagung/cafe-reservation/user/usecase"
 )
 
 func init(){
-	config.LoadEnvVariables()
+	dotenv.LoadEnvVariables()
 }
 
 func main() {
-	dbPostgres := config.NewPostgresDB()
+	dbPostgres := postgresdb.NewPostgresDB()
 
 	menuRepository := menurepository.NewConnectDB(dbPostgres)
 	menuUseCase := menuusecase.NewMenuUC(&menuRepository)
-	menuController := controller.NewMenuController(&menuUseCase)
+	menuController := menucontroller.NewMenuController(&menuUseCase)
 
 	userRepository := userrepository.NewUserRepository(dbPostgres)
 	userUseCase := userusecase.NewUserUC(&userRepository)
-	userController := controller.NewUserController(&userUseCase)
+	userController := usercontroller.NewUserController(&userUseCase)
 	
 
 	app := fiber.New(

@@ -1,15 +1,17 @@
 package main
 
 import (
-	"github.com/bimaagung/cafe-reservation/config"
-	"github.com/bimaagung/cafe-reservation/models/domain"
+	menudomain "github.com/bimaagung/cafe-reservation/menu/domain"
+	"github.com/bimaagung/cafe-reservation/pkg/dotenv"
+	postgresdb "github.com/bimaagung/cafe-reservation/pkg/postgres"
+	userdomain "github.com/bimaagung/cafe-reservation/user/domain"
 )
 
 func init(){
-	config.LoadEnvVariables()
+	dotenv.LoadEnvVariables()
 }
 
 func main() {
-	database := config.NewPostgresDB()
-	database.AutoMigrate(&domain.Menu{}, &domain.User{})
+	database := postgresdb.NewPostgresDB()
+	database.AutoMigrate(&menudomain.Menu{}, &userdomain.User{})
 }

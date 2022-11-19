@@ -2,10 +2,13 @@ package usecase
 
 import (
 	"os"
+	"strconv"
+	"time"
 
 	userdomain "github.com/bimaagung/cafe-reservation/user/domain"
 	"github.com/bimaagung/cafe-reservation/user/repository"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
+	tokenmanager "github.com/bimaagung/cafe-reservation/utils/token_manager"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -45,26 +48,25 @@ func (useCase *userUseCaseImpl) Create(request userdomain.UserReq)(response user
 	// Create User
 	useCase.UserRepository.Create(user)
 
+	expTime , _ := strconv.Atoi(os.Getenv("EXPIRED_TOKEN"))
+
 	//Generate Token
 	claims := jwt.MapClaims{
 		"id": request.Id,
 		"name": request.Name,
 		"username": request.Username,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Duration(expTime) * time.Hour).Unix(),
+		"iss": os.Getenv("APP_NAME"),
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	t, err := token.SignedString([]byte(os.Getenv("ACCESS_TOKEN_KEY")))
-
-	if err != nil {
-		exception.Error(err.Error())
-	}
+	token := tokenmanager.GenerateToken(claims)
 
 	response = userdomain.UserRes{
 		Id: request.Id,
 		Name: request.Name,
 		Username: request.Username,
-		 Token: t,
+		 Token: token,
 	}
 
 	return response

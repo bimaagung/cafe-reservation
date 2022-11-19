@@ -1,12 +1,15 @@
 package controller
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"time"
 
 	"github.com/bimaagung/cafe-reservation/menu/domain"
 	"github.com/bimaagung/cafe-reservation/menu/usecase"
+	"github.com/bimaagung/cafe-reservation/middleware/authorization"
+
 	minioUpload "github.com/bimaagung/cafe-reservation/pkg/minio"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/bimaagung/cafe-reservation/utils/response"
@@ -27,9 +30,9 @@ type Menu struct {
 func (controller *Menu) Route(app *fiber.App) {
 	app.Get("/api/menu", controller.GetList)
 	app.Get("/api/menu/:id", controller.GetById)
-	app.Post("/api/menu", controller.Insert)
-	app.Put("/api/menu/:id", controller.Update)
-	app.Delete("/api/menu/:id", controller.Delete)
+	app.Post("/api/menu", authorization.AuthValidate, controller.Insert)
+	app.Put("/api/menu/:id", authorization.AuthValidate, controller.Update)
+	app.Delete("/api/menu/:id", authorization.AuthValidate, controller.Delete)
 }
 
 func (controller *Menu) Insert(c *fiber.Ctx) error {
@@ -75,6 +78,10 @@ func (controller *Menu) Insert(c *fiber.Ctx) error {
 }
 
 func (controller *Menu) Delete(c *fiber.Ctx) error {
+	
+	user := c.Locals("user")
+	fmt.Println(user)
+
 	id := c.Params("id")
 
 	result := controller.MenuUseCase.Delete(id)

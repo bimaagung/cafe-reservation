@@ -1,11 +1,15 @@
 package usecase
 
 import (
+	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bimaagung/cafe-reservation/menu/domain"
 	"github.com/bimaagung/cafe-reservation/menu/repository"
 	"github.com/bimaagung/cafe-reservation/menu/validation"
+	minioUpload "github.com/bimaagung/cafe-reservation/pkg/minio"
 
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 )
@@ -23,15 +27,28 @@ type menuUseCaseImpl struct {
 	MenuRepository repository.MenuRepository
 }
 
-func (useCase *menuUseCaseImpl) Add(request domain.MenuReq, urlFile string)(response domain.MenuRes) {
+func (useCase *menuUseCaseImpl) Add(request domain.MenuReq)(response domain.MenuRes) {
 	
 	validation.MenuPayloadValidator(request)
+
+	bucketName := "menu"
+	timestamp := time.Now().Unix()
+	objectName :=  strconv.FormatInt(timestamp, 16) +"-"+ request.File.Filename
+	
+	// Upload file menggunakan Minio
+	errUpload := minioUpload.UploadFile(request.File, bucketName, objectName)
+
+	if errUpload != nil {
+		panic(exception.ClientError{
+			Message: errUpload.Error(),
+		})
+	}
 
 	// memindahkan dari request model ke entity/domain Menu
 	menu := domain.Menu {
 		Id: request.Id,
 		Name: strings.ToUpper(request.Name),
-		Url: urlFile,
+		Url: os.Getenv("MINIO_URL_FILE")+"/"+bucketName+"/"+objectName,
 		Price: request.Price,
 		Stock: request.Stock,
 	}

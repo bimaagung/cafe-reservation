@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"mime/multipart"
 	"time"
 )
 
@@ -9,6 +10,7 @@ type MenuReq struct {
 	Name  string `json:"name,omitempty"` 
 	Price int64 `json:"price,omitempty"`
 	Stock int `json:"stock,omitempty"`
+	File *multipart.FileHeader
 }
 
 type MenuRes struct {

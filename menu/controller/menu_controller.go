@@ -2,15 +2,11 @@ package controller
 
 import (
 	"fmt"
-	"os"
-	"strconv"
-	"time"
 
 	"github.com/bimaagung/cafe-reservation/menu/domain"
 	"github.com/bimaagung/cafe-reservation/menu/usecase"
 	"github.com/bimaagung/cafe-reservation/middleware/authorization"
 
-	minioUpload "github.com/bimaagung/cafe-reservation/pkg/minio"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/bimaagung/cafe-reservation/utils/response"
 	"github.com/gofiber/fiber/v2"
@@ -51,24 +47,10 @@ func (controller *Menu) Insert(c *fiber.Ctx) error {
 			Message: errFile.Error(),
 		})
 	}
-
 	
-	bucketName := "menu"
-	timestamp := time.Now().Unix()
-	objectName :=  strconv.FormatInt(timestamp, 16) +"-"+ file.Filename
+	request.File = file
 	
-	// Upload file menggunakan Minio
-	errUpload := minioUpload.UploadFile(file, bucketName, objectName)
-
-	if errUpload != nil {
-		panic(exception.ClientError{
-			Message: errFile.Error(),
-		})
-	}
-
-	urlFile := os.Getenv("MINIO_URL_FILE")+"/"+bucketName+"/"+objectName
-	
-	result := controller.MenuUseCase.Add(request, urlFile)
+	result := controller.MenuUseCase.Add(request)
 
 	return c.JSON(response.SuccessRes{
 		Status: "ok",

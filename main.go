@@ -3,12 +3,15 @@ package main
 import (
 	"github.com/bimaagung/cafe-reservation/pkg/dotenv"
 	postgresdb "github.com/bimaagung/cafe-reservation/pkg/postgres"
+	redisdb "github.com/bimaagung/cafe-reservation/pkg/redis"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	// menu
 	menucontroller "github.com/bimaagung/cafe-reservation/menu/controller"
-	menurepository "github.com/bimaagung/cafe-reservation/menu/repository"
+	menurepositorypostgres "github.com/bimaagung/cafe-reservation/menu/repository/postgres"
+	menurepositoryredis "github.com/bimaagung/cafe-reservation/menu/repository/redis"
 	menuusecase "github.com/bimaagung/cafe-reservation/menu/usecase"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 
@@ -26,9 +29,11 @@ func init(){
 
 func main() {
 	dbPostgres := postgresdb.NewPostgresDB()
+	dbRedis := redisdb.NewRedisDB()
 
-	menuRepository := menurepository.NewConnectDB(dbPostgres)
-	menuUseCase := menuusecase.NewMenuUC(&menuRepository)
+	menuRepositoryPostgres := menurepositorypostgres.NewConnectDB(dbPostgres)
+	menuRepositoryRedis := menurepositoryredis.NewRepositoryRedis(dbRedis)
+	menuUseCase := menuusecase.NewMenuUC(&menuRepositoryPostgres, &menuRepositoryRedis)
 	menuController := menucontroller.NewMenuController(&menuUseCase)
 
 	userRepository := userrepository.NewUserRepository(dbPostgres)

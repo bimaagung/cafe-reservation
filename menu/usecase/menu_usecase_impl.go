@@ -7,27 +7,30 @@ import (
 	"time"
 
 	"github.com/bimaagung/cafe-reservation/menu/domain"
-	"github.com/bimaagung/cafe-reservation/menu/repository"
+	repoitorypostgres "github.com/bimaagung/cafe-reservation/menu/repository/postgres"
+	repoitoryredis "github.com/bimaagung/cafe-reservation/menu/repository/redis"
 	"github.com/bimaagung/cafe-reservation/menu/validation"
 	minioUpload "github.com/bimaagung/cafe-reservation/pkg/minio"
-	"github.com/gofiber/fiber/v2"
-
 	"github.com/bimaagung/cafe-reservation/utils/exception"
+	"github.com/gofiber/fiber/v2"
 )
 
 // menerima repository dan disimpan ke struct menuUseCase
-func NewMenuUC(menuRepository *repository.MenuRepository) MenuUseCase {
+func NewMenuUC(menuRepositoryPostgres *repoitorypostgres.MenuRepository,menuRepositoryRedis *repoitoryredis.MenuRepositoryRedis) MenuUseCase {
 	return &menuUseCaseImpl{
-		MenuRepository: *menuRepository,
+		MenuRepositoryPostgres: *menuRepositoryPostgres,
+		MenuRepositoryRedis: *menuRepositoryRedis,
 	} 
 }
 
 
 // tersimpan repository
 type menuUseCaseImpl struct {
-	MenuRepository repository.MenuRepository
+	MenuRepositoryPostgres repoitorypostgres.MenuRepository
+	MenuRepositoryRedis repoitoryredis.MenuRepositoryRedis
 }
 
+// TODO : url response is empty
 func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(response domain.MenuRes) {
 	
 	validation.MenuPayloadValidator(request)
@@ -55,7 +58,7 @@ func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(resp
 	}
 
 	// validasi menu apabila menu sudah ada
-	getName := useCase.MenuRepository.GetByName(ctx, menu.Name)
+	getName := useCase.MenuRepositoryPostgres.GetByName(ctx, menu.Name)
 
 	if (getName != domain.Menu{}) {
 		panic(exception.NotFoundError{
@@ -64,7 +67,10 @@ func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(resp
 	}
 
 	// disimpan ke database
-	useCase.MenuRepository.Add(ctx, menu)
+	useCase.MenuRepositoryPostgres.Add(ctx, menu)
+
+	errCache := useCase.MenuRepositoryRedis.Delete()
+	exception.Error(errCache)
 
 	response = domain.MenuRes {
 		Id: menu.Id,
@@ -81,7 +87,7 @@ func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(resp
 
 func (useCase *menuUseCaseImpl) Delete(ctx *fiber.Ctx, id string) bool{
 
-	getById := useCase.MenuRepository.GetById(ctx, id)
+	getById := useCase.MenuRepositoryPostgres.GetById(ctx, id)
 	
 	if (getById == domain.Menu{}) {
 		panic(exception.ClientError{
@@ -89,7 +95,10 @@ func (useCase *menuUseCaseImpl) Delete(ctx *fiber.Ctx, id string) bool{
 		})
 	}
 
-	useCase.MenuRepository.Delete(ctx, id)
+	useCase.MenuRepositoryPostgres.Delete(ctx, id)
+
+	errCache := useCase.MenuRepositoryRedis.Delete()
+	exception.Error(errCache)
 
 	response := true
 	return response
@@ -97,27 +106,54 @@ func (useCase *menuUseCaseImpl) Delete(ctx *fiber.Ctx, id string) bool{
 
 func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuRes){
 	var menus []domain.MenuRes
-
-	menu := useCase.MenuRepository.GetList(ctx)
 	
-	for _, v := range menu {
-		  menus = append(menus, domain.MenuRes{
+	resultCache, errCache := useCase.MenuRepositoryRedis.Get()
+
+	if errCache != nil {
+		menu := useCase.MenuRepositoryPostgres.GetList(ctx)
+	
+		for _, v := range menu {
+			menus = append(menus, domain.MenuRes{
+				Id: v.Id,
+				Name: v.Name,
+				Price: v.Price,
+				Stock: v.Stock,
+				CreatedAt: v.CreatedAt,
+				UpdatedAt: v.UpdatedAt,
+			})
+		}
+
+		_, errCache := useCase.MenuRepositoryRedis.Set(menus)
+
+		if errCache != nil {
+			panic(exception.ClientError{
+				Message: errCache.Error(),
+			})
+		}
+		
+		return menus
+	}
+
+
+	for _, v := range resultCache {
+		menus = append(menus, domain.MenuRes{
 			Id: v.Id,
 			Name: v.Name,
 			Price: v.Price,
 			Stock: v.Stock,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
-		  })
+		})
 	}
-	
 
 	return menus
+	
 }
+
 
 func (useCase *menuUseCaseImpl) GetById(ctx *fiber.Ctx, id string) (response domain.MenuRes) {
 	
-	menu := useCase.MenuRepository.GetById(ctx, id)
+	menu := useCase.MenuRepositoryPostgres.GetById(ctx, id)
 	
 	if (menu == domain.Menu{}) {
 		panic(exception.ClientError{
@@ -137,6 +173,7 @@ func (useCase *menuUseCaseImpl) GetById(ctx *fiber.Ctx, id string) (response dom
 	return response
 }
 
+// TODO : fixing update request
 func (useCase *menuUseCaseImpl) Update(ctx *fiber.Ctx, id string, request domain.MenuReq)(response domain.MenuRes) {
 
 	menuReq :=  domain.Menu{
@@ -145,7 +182,7 @@ func (useCase *menuUseCaseImpl) Update(ctx *fiber.Ctx, id string, request domain
 		Stock: request.Stock,
 	}
 
-	menu := useCase.MenuRepository.GetById(ctx , id)
+	menu := useCase.MenuRepositoryPostgres.GetById(ctx , id)
 
 	if(menu == domain.Menu{}) {
 		panic(exception.ClientError{
@@ -154,7 +191,10 @@ func (useCase *menuUseCaseImpl) Update(ctx *fiber.Ctx, id string, request domain
 	}
 
 
-	useCase.MenuRepository.Update(ctx, id, menuReq)
+	useCase.MenuRepositoryPostgres.Update(ctx, id, menuReq)
+
+	errCache := useCase.MenuRepositoryRedis.Delete()
+	exception.Error(errCache)
 
 	validation.MenuPayloadValidator(request)
 	

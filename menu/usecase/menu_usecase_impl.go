@@ -118,6 +118,7 @@ func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuR
 				Name: v.Name,
 				Price: v.Price,
 				Stock: v.Stock,
+				Url: v.Url,
 				CreatedAt: v.CreatedAt,
 				UpdatedAt: v.UpdatedAt,
 			})
@@ -134,13 +135,14 @@ func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuR
 		return menus
 	}
 
-
+	
 	for _, v := range resultCache {
 		menus = append(menus, domain.MenuRes{
 			Id: v.Id,
 			Name: v.Name,
 			Price: v.Price,
 			Stock: v.Stock,
+			Url: v.Url,
 			CreatedAt: v.CreatedAt,
 			UpdatedAt: v.UpdatedAt,
 		})

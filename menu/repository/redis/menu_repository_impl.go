@@ -45,7 +45,6 @@ func (repository *redisMenuRepository) Delete() error {
 
 
 func (repository *redisMenuRepository) Get()([]domain.Menu, error) {  
-
 	var menus []domain.Menu
 
 	val, errResult := repository.redisDB.Get(ctx, "menu").Result()

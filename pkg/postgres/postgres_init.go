@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/bimaagung/cafe-reservation/utils/exception"
-	"gorm.io/driver/postgres"
+	postgres "go.elastic.co/apm/module/apmgormv2/v2/driver/postgres"
 	"gorm.io/gorm"
 )
 

@@ -16,6 +16,8 @@ import (
 	usercontroller "github.com/bimaagung/cafe-reservation/user/controller"
 	userrepository "github.com/bimaagung/cafe-reservation/user/repository"
 	userusecase "github.com/bimaagung/cafe-reservation/user/usecase"
+
+	"go.elastic.co/apm/module/apmfiber/v2"
 )
 
 func init(){
@@ -24,6 +26,7 @@ func init(){
 
 func main() {
 	dbPostgres := postgresdb.NewPostgresDB()
+	dbPostgres = dbPostgres.WithContext(dbPostgres.Statement.Context)
 
 	menuRepository := menurepository.NewConnectDB(dbPostgres)
 	menuUseCase := menuusecase.NewMenuUC(&menuRepository)
@@ -39,6 +42,8 @@ func main() {
 			ErrorHandler: exception.ErrorHandler,
 		},
 	)
+
+	app.Use(apmfiber.Middleware())
 	app.Use(recover.New())
 
 	app.Get("/", func(c *fiber.Ctx) error {

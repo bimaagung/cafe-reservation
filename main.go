@@ -26,7 +26,6 @@ func init(){
 
 func main() {
 	dbPostgres := postgresdb.NewPostgresDB()
-	dbPostgres = dbPostgres.WithContext(dbPostgres.Statement.Context)
 
 	menuRepository := menurepository.NewConnectDB(dbPostgres)
 	menuUseCase := menuusecase.NewMenuUC(&menuRepository)

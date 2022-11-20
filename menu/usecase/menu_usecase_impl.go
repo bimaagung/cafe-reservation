@@ -10,6 +10,7 @@ import (
 	"github.com/bimaagung/cafe-reservation/menu/repository"
 	"github.com/bimaagung/cafe-reservation/menu/validation"
 	minioUpload "github.com/bimaagung/cafe-reservation/pkg/minio"
+	"github.com/gofiber/fiber/v2"
 
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 )
@@ -27,7 +28,7 @@ type menuUseCaseImpl struct {
 	MenuRepository repository.MenuRepository
 }
 
-func (useCase *menuUseCaseImpl) Add(request domain.MenuReq)(response domain.MenuRes) {
+func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(response domain.MenuRes) {
 	
 	validation.MenuPayloadValidator(request)
 
@@ -54,7 +55,7 @@ func (useCase *menuUseCaseImpl) Add(request domain.MenuReq)(response domain.Menu
 	}
 
 	// validasi menu apabila menu sudah ada
-	getName := useCase.MenuRepository.GetByName(menu.Name)
+	getName := useCase.MenuRepository.GetByName(ctx, menu.Name)
 
 	if (getName != domain.Menu{}) {
 		panic(exception.NotFoundError{
@@ -63,7 +64,7 @@ func (useCase *menuUseCaseImpl) Add(request domain.MenuReq)(response domain.Menu
 	}
 
 	// disimpan ke database
-	useCase.MenuRepository.Add(menu)
+	useCase.MenuRepository.Add(ctx, menu)
 
 	response = domain.MenuRes {
 		Id: menu.Id,
@@ -78,9 +79,9 @@ func (useCase *menuUseCaseImpl) Add(request domain.MenuReq)(response domain.Menu
 	return response
 }
 
-func (useCase *menuUseCaseImpl) Delete(id string) bool{
+func (useCase *menuUseCaseImpl) Delete(ctx *fiber.Ctx, id string) bool{
 
-	getById := useCase.MenuRepository.GetById(id)
+	getById := useCase.MenuRepository.GetById(ctx, id)
 	
 	if (getById == domain.Menu{}) {
 		panic(exception.ClientError{
@@ -88,16 +89,16 @@ func (useCase *menuUseCaseImpl) Delete(id string) bool{
 		})
 	}
 
-	useCase.MenuRepository.Delete(id)
+	useCase.MenuRepository.Delete(ctx, id)
 
 	response := true
 	return response
 }
 
-func (useCase *menuUseCaseImpl) GetList() (response []domain.MenuRes){
+func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuRes){
 	var menus []domain.MenuRes
 
-	menu := useCase.MenuRepository.GetList()
+	menu := useCase.MenuRepository.GetList(ctx)
 	
 	for _, v := range menu {
 		  menus = append(menus, domain.MenuRes{
@@ -114,9 +115,9 @@ func (useCase *menuUseCaseImpl) GetList() (response []domain.MenuRes){
 	return menus
 }
 
-func (useCase *menuUseCaseImpl) GetById(id string) (response domain.MenuRes) {
+func (useCase *menuUseCaseImpl) GetById(ctx *fiber.Ctx, id string) (response domain.MenuRes) {
 	
-	menu := useCase.MenuRepository.GetById(id)
+	menu := useCase.MenuRepository.GetById(ctx, id)
 	
 	if (menu == domain.Menu{}) {
 		panic(exception.ClientError{
@@ -136,7 +137,7 @@ func (useCase *menuUseCaseImpl) GetById(id string) (response domain.MenuRes) {
 	return response
 }
 
-func (useCase *menuUseCaseImpl) Update(id string, request domain.MenuReq)(response domain.MenuRes) {
+func (useCase *menuUseCaseImpl) Update(ctx *fiber.Ctx, id string, request domain.MenuReq)(response domain.MenuRes) {
 
 	menuReq :=  domain.Menu{
 		Name: strings.ToUpper(request.Name),
@@ -144,7 +145,7 @@ func (useCase *menuUseCaseImpl) Update(id string, request domain.MenuReq)(respon
 		Stock: request.Stock,
 	}
 
-	menu := useCase.MenuRepository.GetById(id)
+	menu := useCase.MenuRepository.GetById(ctx , id)
 
 	if(menu == domain.Menu{}) {
 		panic(exception.ClientError{
@@ -153,7 +154,7 @@ func (useCase *menuUseCaseImpl) Update(id string, request domain.MenuReq)(respon
 	}
 
 
-	useCase.MenuRepository.Update(id, menuReq)
+	useCase.MenuRepository.Update(ctx, id, menuReq)
 
 	validation.MenuPayloadValidator(request)
 	

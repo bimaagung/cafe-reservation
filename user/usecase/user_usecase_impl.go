@@ -9,6 +9,7 @@ import (
 	"github.com/bimaagung/cafe-reservation/user/repository"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 	tokenmanager "github.com/bimaagung/cafe-reservation/utils/token_manager"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -24,7 +25,7 @@ type userUseCaseImpl struct {
 	UserRepository repository.UserRepository
 }
 
-func (useCase *userUseCaseImpl) Create(request userdomain.UserReq)(response userdomain.UserRes){
+func (useCase *userUseCaseImpl) Create(ctx *fiber.Ctx, request userdomain.UserReq)(response userdomain.UserRes){
 
 	// Check match password
 	if request.Password != request.RetypePassword {
@@ -46,7 +47,7 @@ func (useCase *userUseCaseImpl) Create(request userdomain.UserReq)(response user
 	}
 
 	// Create User
-	useCase.UserRepository.Create(user)
+	useCase.UserRepository.Create(ctx, user)
 
 	expTime , _ := strconv.Atoi(os.Getenv("EXPIRED_TOKEN"))
 

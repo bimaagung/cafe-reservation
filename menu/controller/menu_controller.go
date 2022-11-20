@@ -31,17 +31,17 @@ func (controller *Menu) Route(app *fiber.App) {
 	app.Delete("/api/menu/:id", authorization.AuthValidate, controller.Delete)
 }
 
-func (controller *Menu) Insert(c *fiber.Ctx) error {
+func (controller *Menu) Insert(ctx *fiber.Ctx) error {
 	var request domain.MenuReq
 
 	request.Id = uuid.New().String()
-	if err := c.BodyParser(&request); err != nil {
+	if err := ctx.BodyParser(&request); err != nil {
 		panic(exception.ClientError{
 			Message: err.Error(),
 		})
 	}
 
-	file, errFile := c.FormFile("image")
+	file, errFile := ctx.FormFile("image")
 	if errFile != nil {
 		panic(exception.ClientError{
 			Message: errFile.Error(),
@@ -50,63 +50,63 @@ func (controller *Menu) Insert(c *fiber.Ctx) error {
 	
 	request.File = file
 	
-	result := controller.MenuUseCase.Add(request)
+	result := controller.MenuUseCase.Add(ctx, request)
 
-	return c.JSON(response.SuccessRes{
+	return ctx.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,
 	})
 }
 
-func (controller *Menu) Delete(c *fiber.Ctx) error {
+func (controller *Menu) Delete(ctx *fiber.Ctx) error {
 	
-	user := c.Locals("user")
+	user := ctx.Locals("user")
 	fmt.Println(user)
 
-	id := c.Params("id")
+	id := ctx.Params("id")
 
-	result := controller.MenuUseCase.Delete(id)
-	return c.JSON(response.SuccessRes{
+	result := controller.MenuUseCase.Delete(ctx, id)
+	return ctx.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,
 	})
 }
 
-func (controller *Menu) GetList(c *fiber.Ctx) error {
-	result := controller.MenuUseCase.GetList()
-	return c.JSON(response.SuccessRes{
+func (controller *Menu) GetList(ctx *fiber.Ctx) error {
+	result := controller.MenuUseCase.GetList(ctx)
+	return ctx.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,
 	})
 }
 
-func (controller *Menu) GetById(c *fiber.Ctx) error {
-	 id := c.Params("id")
+func (controller *Menu) GetById(ctx *fiber.Ctx) error {
+	 id := ctx.Params("id")
 
-	 result := controller.MenuUseCase.GetById(id)
+	 result := controller.MenuUseCase.GetById(ctx ,id)
 
-	 return c.JSON(response.SuccessRes{
+	 return ctx.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,
 	 })
 }
 
-func (controller *Menu) Update(c *fiber.Ctx) error {
+func (controller *Menu) Update(ctx *fiber.Ctx) error {
 	var request domain.MenuReq
-	id := c.Params("id")
-	if err := c.BodyParser(&request); err != nil {
+	id := ctx.Params("id")
+	if err := ctx.BodyParser(&request); err != nil {
 		panic(exception.ClientError{
 			Message: err.Error(),
 		})
 	}
 
-	result := controller.MenuUseCase.Update(id, request)
+	result := controller.MenuUseCase.Update(ctx, id, request)
 
-	return c.JSON(response.SuccessRes{
+	return ctx.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,

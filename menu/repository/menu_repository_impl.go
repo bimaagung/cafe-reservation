@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/bimaagung/cafe-reservation/menu/domain"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
+	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -16,36 +17,46 @@ type postgresMenuRepository struct {
 	DB *gorm.DB
 }
 
-func (repository *postgresMenuRepository) Add(menu domain.Menu) {  
-	result := repository.DB.Create(&menu)
+func (repository *postgresMenuRepository) Add(ctx *fiber.Ctx,menu domain.Menu) {  
+	db := repository.DB.WithContext(ctx.Context())
+	result := db.Create(&menu)
 	exception.Error(result.Error)
 }
 
-func (repository *postgresMenuRepository) Delete(id string) {  
-	result := repository.DB.Where("id = ?", id).Delete(&domain.Menu{})
+func (repository *postgresMenuRepository) Delete(ctx *fiber.Ctx, id string) {  
+	db := repository.DB.WithContext(ctx.Context())
+	result := db.Where("id = ?", id).Delete(&domain.Menu{})
 	exception.Error(result.Error)
 }
 
-func (repository *postgresMenuRepository) GetByName(name string) domain.Menu {  
+func (repository *postgresMenuRepository) GetByName(ctx *fiber.Ctx, name string) domain.Menu {  
 	var menu domain.Menu
-	repository.DB.First(&menu, "name = ?", name)
+
+	db := repository.DB.WithContext(ctx.Context())
+	db.First(&menu, "name = ?", name)
 	return menu
 }
 
-func (repository *postgresMenuRepository) GetById(id string) domain.Menu {  
+func (repository *postgresMenuRepository) GetById(ctx *fiber.Ctx, id string) domain.Menu {  
 	var menu domain.Menu
-	repository.DB.First(&menu, "id = ?", id)
+
+	db := repository.DB.WithContext(ctx.Context())
+	db.First(&menu, "id = ?", id)
 	return menu
 }
 
-func (repository *postgresMenuRepository) GetList() []domain.Menu {  
+func (repository *postgresMenuRepository) GetList(ctx *fiber.Ctx) []domain.Menu {  
 	var menu []domain.Menu
-	result := repository.DB.Find(&menu)
+
+	db := repository.DB.WithContext(ctx.Context())
+	result := db.Find(&menu)
+
 	exception.Error(result.Error)
 	return menu
 }
 
-func (repository *postgresMenuRepository) Update(id string, menu domain.Menu) {
-	result := repository.DB.Where("id = ?", id).Updates(&menu)
+func (repository *postgresMenuRepository) Update(ctx *fiber.Ctx, id string, menu domain.Menu) {
+	db := repository.DB.WithContext(ctx.Context())
+	result := db.Where("id = ?", id).Updates(&menu)
 	exception.Error(result.Error)
 }

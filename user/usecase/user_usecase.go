@@ -1,7 +1,10 @@
 package usecase
 
-import userdomain "github.com/bimaagung/cafe-reservation/user/domain"
+import (
+	userdomain "github.com/bimaagung/cafe-reservation/user/domain"
+	"github.com/gofiber/fiber/v2"
+)
 
 type UserUseCase interface {
-	Create(request userdomain.UserReq) userdomain.UserRes
+	Create(ctx *fiber.Ctx, request userdomain.UserReq) userdomain.UserRes
 }

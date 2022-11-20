@@ -23,23 +23,23 @@ func (controller *User) Route(app *fiber.App) {
 	api.Post("/auth/register", controller.Register)
 }
 
-func (controller *User) Register(c *fiber.Ctx) error {
+func (controller *User) Register(ctx *fiber.Ctx) error {
 	
 	var request domain.UserReq
 
 	request.Id = uuid.New().String()
 	
-	if err := c.BodyParser(&request); err != nil {
+	if err := ctx.BodyParser(&request); err != nil {
 		panic(exception.ClientError{
 			Message: err.Error(),
 		})
 	}
 
-	result := controller.UserUseCase.Create(request)
+	result := controller.UserUseCase.Create(ctx, request)
 
 	
 
-	return c.JSON(response.SuccessRes{
+	return ctx.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"time"
@@ -9,7 +10,6 @@ import (
 	"github.com/bimaagung/cafe-reservation/user/repository"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 	tokenmanager "github.com/bimaagung/cafe-reservation/utils/token_manager"
-	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -25,19 +25,16 @@ type userUseCaseImpl struct {
 	UserRepository repository.UserRepository
 }
 
-func (useCase *userUseCaseImpl) Create(ctx *fiber.Ctx, request userdomain.UserReq)(response userdomain.UserRes){
+func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.UserReq)(response userdomain.UserRes){
 
 	// Check match password
 	if request.Password != request.RetypePassword {
-		panic(exception.ClientError{
-			Message: "password and retype password not match",
-		})
+		panic(exception.NewClientError{Message: "password and retype password not match"})
 	}
+
 	// Hash Password
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), 10)
-	if err != nil {
-		exception.Error(err.Error())
-	}
+	exception.CheckError(err)
 	
 	user := userdomain.User{
 		Id: request.Id,
@@ -46,10 +43,15 @@ func (useCase *userUseCaseImpl) Create(ctx *fiber.Ctx, request userdomain.UserRe
 		Password: string(hashPassword),
 	}
 
-	// Create User
+	// Check usernam already exists
+	if v, _ := useCase.UserRepository.GetByUsername(ctx, user.Username); v.Id != "" {
+		panic(exception.NewClientError{Message: "user already exists"})
+	}
+	
 	useCase.UserRepository.Create(ctx, user)
 
-	expTime , _ := strconv.Atoi(os.Getenv("EXPIRED_TOKEN"))
+	expTime , errExpToken := strconv.Atoi(os.Getenv("EXPIRED_TOKEN"))
+	exception.CheckError(errExpToken)
 
 	//Generate Token
 	claims := jwt.MapClaims{
@@ -67,7 +69,7 @@ func (useCase *userUseCaseImpl) Create(ctx *fiber.Ctx, request userdomain.UserRe
 		Id: request.Id,
 		Name: request.Name,
 		Username: request.Username,
-		 Token: token,
+		Token: token,
 	}
 
 	return response

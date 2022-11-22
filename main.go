@@ -54,9 +54,10 @@ func main() {
 		return c.SendString("Hello, world!")
 	})
 
+
 	menuController.Route(app)
 	userController.Route(app)
 
 	err := app.Listen(":3000")
-	exception.Error(err)
+	exception.CheckError(err)
 }

@@ -43,9 +43,7 @@ func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(resp
 	errUpload := minioUpload.UploadFile(request.File, bucketName, objectName)
 
 	if errUpload != nil {
-		panic(exception.ClientError{
-			Message: errUpload.Error(),
-		})
+		panic(exception.NewClientError{Message: errUpload.Error()})
 	}
 
 	// memindahkan dari request model ke entity/domain Menu
@@ -61,16 +59,15 @@ func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(resp
 	getName := useCase.MenuRepositoryPostgres.GetByName(ctx, menu.Name)
 
 	if (getName != domain.Menu{}) {
-		panic(exception.NotFoundError{
-			Message: "menu is already in use",
-		})
+		panic(exception.NewNotFoundError{Message:  "menu is already in use"})
+		
 	}
 
 	// disimpan ke database
 	useCase.MenuRepositoryPostgres.Add(ctx, menu)
 
 	errCache := useCase.MenuRepositoryRedis.Delete()
-	exception.Error(errCache)
+	exception.CheckError(errCache)
 
 	response = domain.MenuRes {
 		Id: menu.Id,
@@ -90,15 +87,13 @@ func (useCase *menuUseCaseImpl) Delete(ctx *fiber.Ctx, id string) bool{
 	getById := useCase.MenuRepositoryPostgres.GetById(ctx, id)
 	
 	if (getById == domain.Menu{}) {
-		panic(exception.ClientError{
-			Message: "menu not found",
-		})
+		panic(exception.NewNotFoundError{Message:"menu not found"})
 	}
 
 	useCase.MenuRepositoryPostgres.Delete(ctx, id)
 
 	errCache := useCase.MenuRepositoryRedis.Delete()
-	exception.Error(errCache)
+	exception.CheckError(errCache)
 
 	response := true
 	return response
@@ -127,9 +122,7 @@ func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuR
 		_, errCache := useCase.MenuRepositoryRedis.Set(menus)
 
 		if errCache != nil {
-			panic(exception.ClientError{
-				Message: errCache.Error(),
-			})
+			panic(exception.NewClientError{Message: errCache.Error()})
 		}
 		
 		return menus
@@ -158,9 +151,7 @@ func (useCase *menuUseCaseImpl) GetById(ctx *fiber.Ctx, id string) (response dom
 	menu := useCase.MenuRepositoryPostgres.GetById(ctx, id)
 	
 	if (menu == domain.Menu{}) {
-		panic(exception.ClientError{
-			Message: "menu not found",
-		})
+		panic(exception.NewClientError{Message: "menu not found"})
 	}
 
 	response = domain.MenuRes{
@@ -187,16 +178,14 @@ func (useCase *menuUseCaseImpl) Update(ctx *fiber.Ctx, id string, request domain
 	menu := useCase.MenuRepositoryPostgres.GetById(ctx , id)
 
 	if(menu == domain.Menu{}) {
-		panic(exception.ClientError{
-			Message: "menu not found",
-		})
+		panic(exception.NewClientError{Message:  "menu not found"})
 	}
 
 
 	useCase.MenuRepositoryPostgres.Update(ctx, id, menuReq)
 
 	errCache := useCase.MenuRepositoryRedis.Delete()
-	exception.Error(errCache)
+	exception.CheckError(errCache)
 
 	validation.MenuPayloadValidator(request)
 	

@@ -1,9 +1,9 @@
 package exception
 
-type ClientError struct {
+type NewClientError struct {
 	Message string
 }
 
-func (clientError ClientError) Error() string {
-	return clientError.Message
+func (err NewClientError) Error() string {
+	return err.Message
 }

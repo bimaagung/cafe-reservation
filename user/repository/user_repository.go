@@ -1,11 +1,12 @@
 package repository
 
 import (
+	"context"
+
 	userdomain "github.com/bimaagung/cafe-reservation/user/domain"
-	"github.com/gofiber/fiber/v2"
 )
 
 type UserRepository interface {
-	Create(ctx *fiber.Ctx, user userdomain.User)
-	GetById(ctx *fiber.Ctx, id string) (user userdomain.User)
+	Create(ctx context.Context, user userdomain.User) 
+	GetByUsername(ctx context.Context, username string) (user userdomain.User, err error)
 }

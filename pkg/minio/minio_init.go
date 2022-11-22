@@ -24,7 +24,7 @@ func MinioConnection(bucketName string) (*minio.Client, error) {
 
 	if errInit != nil {
 		log.Fatalln(errInit)
-		exception.Error(errInit.Error())
+		exception.CheckError(errInit)
 	}
 
 	log.Printf("%#v\n", minioClient) // minioClient is now setup
@@ -39,7 +39,7 @@ func MinioConnection(bucketName string) (*minio.Client, error) {
             log.Printf("We already own %s\n", bucketName)
         } else {
             log.Fatalln(err)
-			exception.Error(err.Error())
+			exception.CheckError(err)
         }
 
 	} else {

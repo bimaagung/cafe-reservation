@@ -15,8 +15,6 @@ func MenuPayloadValidator(request domain.MenuReq){
 	)
 
 	if err != nil {
-		panic(exception.ClientError{
-			Message: err.Error(),
-		})
+		panic(exception.NewClientError{Message: err.Error()})
 	}
 }

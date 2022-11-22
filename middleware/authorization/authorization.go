@@ -18,7 +18,7 @@ func AuthValidate(c *fiber.Ctx) error {
 	authorization := c.Get("Authorization")
 
 	if authorization == "" {
-		panic(exception.Unathorized{})
+		panic(exception.NewUnauthorized{})
 	}
 
 	splitString := strings.Split(authorization, " ")
@@ -29,7 +29,6 @@ func AuthValidate(c *fiber.Ctx) error {
 		getToken = splitString[1]
 	}
 
-
 	token, err := jwt.Parse(getToken, func(token *jwt.Token) (interface{}, error){
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: error")
@@ -39,9 +38,7 @@ func AuthValidate(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
-		panic(exception.Unathorized{
-			Message: err.Error(),
-		})
+		panic(exception.NewUnauthorized{})
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims);
@@ -49,9 +46,7 @@ func AuthValidate(c *fiber.Ctx) error {
 	if ok && token.Valid {
 		claimsToken = claims
 	}else {
-		panic(exception.Unathorized{
-			Message: err.Error(),
-		})
+		panic(exception.NewUnauthorized{})
 	}
 
 	c.Locals("user", claimsToken)

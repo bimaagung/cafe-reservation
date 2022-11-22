@@ -1,9 +1,9 @@
 package exception
 
-type NotFoundError struct {
+type NewNotFoundError struct {
 	Message string
 }
 
-func (notFoundError NotFoundError) Error() string {
-	return notFoundError.Message
+func (err NewNotFoundError) Error() string {
+	return err.Message
 }

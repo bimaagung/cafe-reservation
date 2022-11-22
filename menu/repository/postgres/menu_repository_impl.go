@@ -20,13 +20,13 @@ type postgresMenuRepository struct {
 func (repository *postgresMenuRepository) Add(ctx *fiber.Ctx,menu domain.Menu) {  
 	db := repository.DB.WithContext(ctx.Context())
 	result := db.Create(&menu)
-	exception.Error(result.Error)
+	exception.CheckError(result.Error)
 }
 
 func (repository *postgresMenuRepository) Delete(ctx *fiber.Ctx, id string) {  
 	db := repository.DB.WithContext(ctx.Context())
 	result := db.Where("id = ?", id).Delete(&domain.Menu{})
-	exception.Error(result.Error)
+	exception.CheckError(result.Error)
 }
 
 func (repository *postgresMenuRepository) GetByName(ctx *fiber.Ctx, name string) domain.Menu {  
@@ -51,12 +51,12 @@ func (repository *postgresMenuRepository) GetList(ctx *fiber.Ctx) []domain.Menu 
 	db := repository.DB.WithContext(ctx.Context())
 	result := db.Find(&menu)
 
-	exception.Error(result.Error)
+	exception.CheckError(result.Error)
 	return menu
 }
 
 func (repository *postgresMenuRepository) Update(ctx *fiber.Ctx, id string, menu domain.Menu) {
 	db := repository.DB.WithContext(ctx.Context())
 	result := db.Where("id = ?", id).Updates(&menu)
-	exception.Error(result.Error)
+	exception.CheckError(result.Error)
 }

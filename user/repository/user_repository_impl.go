@@ -1,9 +1,11 @@
 package repository
 
 import (
+	"context"
+	"errors"
+
 	userdomain "github.com/bimaagung/cafe-reservation/user/domain"
 	"github.com/bimaagung/cafe-reservation/utils/exception"
-	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
 )
 
@@ -18,16 +20,23 @@ type postgresUserRepository struct {
 	DB *gorm.DB
 }
 
-func (repository *postgresUserRepository) Create(ctx *fiber.Ctx, user userdomain.User) {
-
-	db := repository.DB.WithContext(ctx.Context())
+func (repository *postgresUserRepository) Create(ctx context.Context, user userdomain.User) {
+	db := repository.DB.WithContext(ctx)
 	result := db.Create(&user)
-	exception.Error(result.Error)
-	
+	exception.CheckError(result.Error)
 }
 
-func (repository *postgresUserRepository) GetById(ctx *fiber.Ctx, id string)(user userdomain.User) {
-	db := repository.DB.WithContext(ctx.Context())
-	db.First(&user, "id = ?", id)
-	return user
+func (repository *postgresUserRepository) GetByUsername(ctx context.Context, username string)(userdomain.User, error) {
+	var user userdomain.User
+	
+	db := repository.DB.WithContext(ctx)
+	result := db.First(&user, "username = ?", username)
+
+	if !errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		err := result.Scan(&user)
+		exception.CheckError(err.Error)
+		return user, nil
+	} else {
+		return user, errors.New("user not found")
+	}	
 }

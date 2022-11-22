@@ -23,7 +23,7 @@ func UploadFile(file *multipart.FileHeader, bucketName, objectName string) error
 	minioClient, errClient := MinioConnection(bucketName)
 
 	if errClient != nil {
-		exception.Error(errClient.Error())
+		exception.CheckError(errClient)
 	}
 
 	fileBuffer := buffer

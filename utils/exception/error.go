@@ -1,7 +1,14 @@
 package exception
 
-func Error(err interface{}) {
+import (
+	"errors"
+	"fmt"
+)
+
+func CheckError(err error) {
 	if err != nil {
-		panic(err)
+		fmt.Errorf(err.Error())
+		errors.New(err.Error())
+		//panic(err.Error())
 	}
 }

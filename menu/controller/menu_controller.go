@@ -36,16 +36,12 @@ func (controller *Menu) Insert(ctx *fiber.Ctx) error {
 
 	request.Id = uuid.New().String()
 	if err := ctx.BodyParser(&request); err != nil {
-		panic(exception.ClientError{
-			Message: err.Error(),
-		})
+		panic(exception.NewClientError{Message: err.Error()})
 	}
 
 	file, errFile := ctx.FormFile("image")
 	if errFile != nil {
-		panic(exception.ClientError{
-			Message: errFile.Error(),
-		})
+		panic(exception.NewClientError{Message: errFile.Error()})
 	}
 	
 	request.File = file
@@ -99,9 +95,7 @@ func (controller *Menu) Update(ctx *fiber.Ctx) error {
 	var request domain.MenuReq
 	id := ctx.Params("id")
 	if err := ctx.BodyParser(&request); err != nil {
-		panic(exception.ClientError{
-			Message: err.Error(),
-		})
+		panic(exception.NewClientError{Message: err.Error()})
 	}
 
 	result := controller.MenuUseCase.Update(ctx, id, request)

@@ -8,16 +8,16 @@ import (
 
 	userdomain "github.com/bimaagung/cafe-reservation/user/domain"
 	"github.com/bimaagung/cafe-reservation/user/repository"
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	tokenmanager "github.com/bimaagung/cafe-reservation/utils/token_manager"
+	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
 
-func NewUserUC(userRepository *repository.UserRepository) UserUseCase {
+func NewUserUC(userRepository repository.UserRepository) UserUseCase {
 	return &userUseCaseImpl {
-		UserRepository: *userRepository,
+		UserRepository: userRepository,
 	}
 }
 
@@ -25,16 +25,18 @@ type userUseCaseImpl struct {
 	UserRepository repository.UserRepository
 }
 
-func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.UserReq)(response userdomain.UserRes){
+func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.UserReq)(response userdomain.UserRes, err error){
 
 	// Check match password
 	if request.Password != request.RetypePassword {
-		panic(exception.NewClientError{Message: "password and retype password not match"})
+		return response, fiber.NewError(fiber.ErrBadRequest.Code, "password and retype password not match")
 	}
 
 	// Hash Password
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), 10)
-	exception.CheckError(err)
+	if err != nil {
+		return response, err
+	}
 	
 	user := userdomain.User{
 		Id: request.Id,
@@ -44,14 +46,21 @@ func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.U
 	}
 
 	// Check usernam already exists
-	if v, _ := useCase.UserRepository.GetByUsername(ctx, user.Username); v.Id != "" {
-		panic(exception.NewClientError{Message: "user already exists"})
+	if userByUsername, err := useCase.UserRepository.GetByUsername(ctx, user.Username); userByUsername.Id != "" {
+		if err != nil {
+			return response, err	
+		}
+		return response, fiber.NewError(fiber.ErrBadRequest.Code, "user already exists")
 	}
 	
-	useCase.UserRepository.Create(ctx, user)
+	if _, err = useCase.UserRepository.Create(ctx, user); err != nil {
+		return response, err
+	}
 
-	expTime , errExpToken := strconv.Atoi(os.Getenv("EXPIRED_TOKEN"))
-	exception.CheckError(errExpToken)
+	expTime , err := strconv.Atoi(os.Getenv("EXPIRED_TOKEN"))
+	if err != nil {
+		return response, err
+	}
 
 	//Generate Token
 	claims := jwt.MapClaims{
@@ -63,7 +72,11 @@ func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.U
 		"iss": os.Getenv("APP_NAME"),
 	}
 
-	token := tokenmanager.GenerateToken(claims)
+	token, err := tokenmanager.GenerateToken(claims) 
+
+	if err != nil {
+		return response, err
+	}
 
 	response = userdomain.UserRes{
 		Id: request.Id,
@@ -72,5 +85,5 @@ func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.U
 		Token: token,
 	}
 
-	return response
+	return response, nil
 }

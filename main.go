@@ -37,8 +37,8 @@ func main() {
 	menuController := menucontroller.NewMenuController(&menuUseCase)
 
 	userRepository := userrepository.NewUserRepository(dbPostgres)
-	userUseCase := userusecase.NewUserUC(&userRepository)
-	userController := usercontroller.NewUserController(&userUseCase)
+	userUseCase := userusecase.NewUserUC(userRepository)
+	userController := usercontroller.NewUserController(userUseCase)
 	
 
 	app := fiber.New(

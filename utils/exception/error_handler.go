@@ -1,7 +1,7 @@
 package exception
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/bimaagung/cafe-reservation/utils/response"
 	"github.com/gofiber/fiber/v2"
@@ -9,30 +9,31 @@ import (
 
 func ErrorHandler(ctx *fiber.Ctx, err error) error {
 
-	errNotFound, notFound := err.(NewNotFoundError)
-	errClientError, clientError := err.(NewClientError)
-	_, unauthorized := err.(NewUnauthorized)
+	code := fiber.StatusInternalServerError
 
-	if clientError {
-		return ctx.Status(fiber.StatusBadRequest).JSON(response.ErrorRes{
-			Status: "failed",
-			Message: errClientError.Message,
-		})
-	} else if notFound {
-		return ctx.Status(fiber.StatusNotFound).JSON(response.ErrorRes{
-			Status: "failed",
-			Message: errNotFound.Message,
-		})
-	} else if unauthorized {
-		return ctx.Status(fiber.StatusUnauthorized).JSON(response.ErrorRes{
-			Status: "failed",
-			Message: "unauthorized",
-		})
-	}else{
-		fmt.Errorf("internal error:", err)
+	var e *fiber.Error
+	if errors.As(err, &e) {
+		code = e.Code
+	}
+
+	if code >= fiber.StatusInternalServerError {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(response.ErrorRes{
-			Status: "failed",
+			Status:  "failed",
 			Message: "internal server error",
 		})
 	}
+
+	errResult := ctx.Status(code).JSON(response.ErrorRes{
+		Status:  "failed",
+		Message: err.Error(),
+	})
+
+	if errResult != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(response.ErrorRes{
+			Status:  "failed",
+			Message: "internal server error",
+		})
+	}
+
+	return nil
 }

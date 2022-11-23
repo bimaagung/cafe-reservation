@@ -7,5 +7,5 @@ import (
 )
 
 type UserUseCase interface {
-	Create(ctx context.Context, request userdomain.UserReq) (userdomain.UserRes)
+	Create(ctx context.Context, request userdomain.UserReq) (userdomain.UserRes, error)
 }

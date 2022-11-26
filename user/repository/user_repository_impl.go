@@ -18,7 +18,7 @@ type postgresUserRepository struct {
 	DB *gorm.DB
 }
 
-func (repository *postgresUserRepository) Create(ctx context.Context, user userdomain.User) (string, error) {
+func (repository *postgresUserRepository) Create(ctx context.Context, user *userdomain.User) (string, error) {
 	db := repository.DB.WithContext(ctx)
 	err := db.Create(&user).Error
 

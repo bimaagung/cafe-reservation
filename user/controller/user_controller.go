@@ -30,11 +30,10 @@ func (controller *User) Register(c *fiber.Ctx) error {
 	request.Id = uuid.New().String()
 	
 	if err := c.BodyParser(&request); err != nil {
-		return err
+		return fiber.NewError(fiber.ErrBadRequest.Code, err.Error())
 	}
 
-
-	result, err := controller.UserUseCase.Create(ctx, request)
+	result, err := controller.UserUseCase.Create(ctx, &request)
 
 	if err != nil {
 		return err

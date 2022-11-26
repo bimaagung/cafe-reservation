@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -24,7 +23,6 @@ func MinioConnection(bucketName string) (*minio.Client, error) {
 
 	if errInit != nil {
 		log.Fatalln(errInit)
-		exception.CheckError(errInit)
 	}
 
 	log.Printf("%#v\n", minioClient) // minioClient is now setup
@@ -39,7 +37,6 @@ func MinioConnection(bucketName string) (*minio.Client, error) {
             log.Printf("We already own %s\n", bucketName)
         } else {
             log.Fatalln(err)
-			exception.CheckError(err)
         }
 
 	} else {

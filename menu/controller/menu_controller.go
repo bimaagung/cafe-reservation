@@ -7,7 +7,6 @@ import (
 	"github.com/bimaagung/cafe-reservation/menu/usecase"
 	"github.com/bimaagung/cafe-reservation/middleware/authorization"
 
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/bimaagung/cafe-reservation/utils/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -31,76 +30,109 @@ func (controller *Menu) Route(app *fiber.App) {
 	app.Delete("/api/menu/:id", authorization.AuthValidate, controller.Delete)
 }
 
-func (controller *Menu) Insert(ctx *fiber.Ctx) error {
-	var request domain.MenuReq
+func (controller *Menu) Insert(c *fiber.Ctx) error {
+	var ctx = c.Context()
 
+	var request domain.MenuReq
 	request.Id = uuid.New().String()
-	if err := ctx.BodyParser(&request); err != nil {
-		panic(exception.NewClientError{Message: err.Error()})
+	if err := c.BodyParser(&request); err != nil {
+		return fiber.NewError(fiber.ErrBadRequest.Code, err.Error())
 	}
 
-	file, errFile := ctx.FormFile("image")
+	file, errFile := c.FormFile("image")
 	if errFile != nil {
-		panic(exception.NewClientError{Message: errFile.Error()})
+		return fiber.NewError(fiber.ErrBadRequest.Code, errFile.Error())
 	}
 	
 	request.File = file
 	
-	result := controller.MenuUseCase.Add(ctx, request)
+	result, err := controller.MenuUseCase.Add(ctx, &request)
 
-	return ctx.JSON(response.SuccessRes{
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,
 	})
 }
 
-func (controller *Menu) Delete(ctx *fiber.Ctx) error {
-	
-	user := ctx.Locals("user")
+func (controller *Menu) Delete(c *fiber.Ctx) error {
+	var ctx = c.Context()
+
+	user := c.Locals("user")
 	fmt.Println(user)
 
-	id := ctx.Params("id")
+	id := c.Params("id")
 
-	result := controller.MenuUseCase.Delete(ctx, id)
-	return ctx.JSON(response.SuccessRes{
+	_, err := controller.MenuUseCase.Delete(ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(response.SuccessRes{
+		Status: "ok",
+		Message: "success",
+	})
+}
+
+func (controller *Menu) GetList(c *fiber.Ctx) error {
+	var ctx = c.Context()
+
+	result, err := controller.MenuUseCase.GetList(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,
 	})
 }
 
-func (controller *Menu) GetList(ctx *fiber.Ctx) error {
-	result := controller.MenuUseCase.GetList(ctx)
-	return ctx.JSON(response.SuccessRes{
-		Status: "ok",
-		Message: "success",
-		Data: result,
-	})
-}
+func (controller *Menu) GetById(c *fiber.Ctx) error {
+	var ctx = c.Context()
 
-func (controller *Menu) GetById(ctx *fiber.Ctx) error {
-	 id := ctx.Params("id")
+	 id := c.Params("id")
 
-	 result := controller.MenuUseCase.GetById(ctx ,id)
+	 result, err := controller.MenuUseCase.GetById(ctx ,id)
 
-	 return ctx.JSON(response.SuccessRes{
+	 if err != nil {
+		return err
+	}
+
+	 return c.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,
 	 })
 }
 
-func (controller *Menu) Update(ctx *fiber.Ctx) error {
+func (controller *Menu) Update(c *fiber.Ctx) error {
+	var ctx = c.Context()
+
 	var request domain.MenuReq
-	id := ctx.Params("id")
-	if err := ctx.BodyParser(&request); err != nil {
-		panic(exception.NewClientError{Message: err.Error()})
+	id := c.Params("id")
+	if err := c.BodyParser(&request); err != nil {
+		return fiber.NewError(fiber.ErrBadRequest.Code, err.Error())
 	}
 
-	result := controller.MenuUseCase.Update(ctx, id, request)
+	file, _ := c.FormFile("image")
+	
+	request.File = file
 
-	return ctx.JSON(response.SuccessRes{
+	result, err := controller.MenuUseCase.Update(ctx, id, &request)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,

@@ -13,9 +13,10 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+const patchEnv = "../../.env"
 
 func Test_userUseCaseImpl_Create(t *testing.T) {
-	godotenv.Load("../../.env")
+	godotenv.Load(patchEnv)
 	
 	mockUserRepo := new(mocks.UserRepository)
 	mockUser := domain.UserReq{
@@ -27,9 +28,9 @@ func Test_userUseCaseImpl_Create(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		tempMockUser := mockUser
+		tempMockUser := &mockUser
 		mockUserRepo.On("GetByUsername", mock.Anything, mock.AnythingOfType("string")).Return(domain.User{}, nil).Once()
-		mockUserRepo.On("Create", mock.Anything, mock.AnythingOfType("domain.User")).Return("97391bbb-a48f-48e2-a166-db669e6377fc", nil).Once()
+		mockUserRepo.On("Create", mock.Anything, mock.AnythingOfType("*domain.User")).Return("97391bbb-a48f-48e2-a166-db669e6377fc", nil).Once()
 
 		u := usecase.NewUserUC(mockUserRepo)
 
@@ -54,7 +55,7 @@ func Test_userUseCaseImpl_Create(t *testing.T) {
 
 		u := usecase.NewUserUC(mockUserRepo)
 
-		_, err := u.Create(context.TODO(), tempMockUser)
+		_, err := u.Create(context.TODO(), &tempMockUser)
 		
 		assert.Error(t, err)
 		mockUserRepo.AssertExpectations(t)

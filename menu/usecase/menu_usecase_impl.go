@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"context"
 	"os"
 	"strconv"
 	"strings"
@@ -11,15 +12,14 @@ import (
 	repoitoryredis "github.com/bimaagung/cafe-reservation/menu/repository/redis"
 	"github.com/bimaagung/cafe-reservation/menu/validation"
 	minioUpload "github.com/bimaagung/cafe-reservation/pkg/minio"
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/gofiber/fiber/v2"
 )
 
 // menerima repository dan disimpan ke struct menuUseCase
-func NewMenuUC(menuRepositoryPostgres *repoitorypostgres.MenuRepository,menuRepositoryRedis *repoitoryredis.MenuRepositoryRedis) MenuUseCase {
+func NewMenuUC(menuRepositoryPostgres repoitorypostgres.MenuRepository, menuRepositoryRedis repoitoryredis.MenuRepositoryRedis) MenuUseCase {
 	return &menuUseCaseImpl{
-		MenuRepositoryPostgres: *menuRepositoryPostgres,
-		MenuRepositoryRedis: *menuRepositoryRedis,
+		MenuRepositoryPostgres: menuRepositoryPostgres,
+		MenuRepositoryRedis: menuRepositoryRedis,
 	} 
 }
 
@@ -30,20 +30,21 @@ type menuUseCaseImpl struct {
 	MenuRepositoryRedis repoitoryredis.MenuRepositoryRedis
 }
 
-// TODO : url response is empty
-func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(response domain.MenuRes) {
-	
-	validation.MenuPayloadValidator(request)
+var bucketName = "menu"
+var timestamp = time.Now().Unix()
 
-	bucketName := "menu"
-	timestamp := time.Now().Unix()
+
+func (useCase *menuUseCaseImpl) Add(ctx context.Context, request *domain.MenuReq)(response domain.MenuRes, err error) {
+	
+	if errValidation := validation.MenuPayloadValidator(request); errValidation != nil {
+		return response, fiber.NewError(fiber.ErrBadRequest.Code, errValidation.Error())
+	}
+
 	objectName :=  strconv.FormatInt(timestamp, 16) +"-"+ request.File.Filename
 	
 	// Upload file menggunakan Minio
-	errUpload := minioUpload.UploadFile(request.File, bucketName, objectName)
-
-	if errUpload != nil {
-		panic(exception.NewClientError{Message: errUpload.Error()})
+	if err = minioUpload.UploadFile(request.File, bucketName, objectName); err != nil {
+		return response, err
 	}
 
 	// memindahkan dari request model ke entity/domain Menu
@@ -56,18 +57,23 @@ func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(resp
 	}
 
 	// validasi menu apabila menu sudah ada
-	getName := useCase.MenuRepositoryPostgres.GetByName(ctx, menu.Name)
+	var getName domain.Menu
+	if getName, err = useCase.MenuRepositoryPostgres.GetByName(ctx, menu.Name); err != nil {
+		return response, err
+	}
 
 	if (getName != domain.Menu{}) {
-		panic(exception.NewNotFoundError{Message:  "menu is already in use"})
-		
+		return response, fiber.NewError(fiber.ErrBadRequest.Code, "menu is already in use")
 	}
 
 	// disimpan ke database
-	useCase.MenuRepositoryPostgres.Add(ctx, menu)
+	if _, err = useCase.MenuRepositoryPostgres.Add(ctx, &menu); err != nil {
+		return response, err
+	}
 
-	errCache := useCase.MenuRepositoryRedis.Delete()
-	exception.CheckError(errCache)
+	if err = useCase.MenuRepositoryRedis.Delete(); err != nil {
+		return response, err
+	}
 
 	response = domain.MenuRes {
 		Id: menu.Id,
@@ -79,36 +85,44 @@ func (useCase *menuUseCaseImpl) Add(ctx *fiber.Ctx, request domain.MenuReq)(resp
 		UpdatedAt: menu.UpdatedAt,
 	}
 
-	return response
+	return response, nil
 }
 
-func (useCase *menuUseCaseImpl) Delete(ctx *fiber.Ctx, id string) bool{
+func (useCase *menuUseCaseImpl) Delete(ctx context.Context, id string) (response bool,err error){
 
-	getById := useCase.MenuRepositoryPostgres.GetById(ctx, id)
-	
-	if (getById == domain.Menu{}) {
-		panic(exception.NewNotFoundError{Message:"menu not found"})
+	var getById domain.Menu
+	if getById, err = useCase.MenuRepositoryPostgres.GetById(ctx, id); err != nil {
+		return false, err
 	}
 
-	useCase.MenuRepositoryPostgres.Delete(ctx, id)
+	if (getById == domain.Menu{}) {
+		return false, fiber.NewError(fiber.StatusNotFound, "menu not found")
+	}
 
-	errCache := useCase.MenuRepositoryRedis.Delete()
-	exception.CheckError(errCache)
+	if err = useCase.MenuRepositoryPostgres.Delete(ctx, id); err != nil {
+		return false, err
+	}
 
-	response := true
-	return response
+	if err = useCase.MenuRepositoryRedis.Delete(); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
-func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuRes){
-	var menus []domain.MenuRes
+func (useCase *menuUseCaseImpl) GetList(ctx context.Context) (response []domain.MenuRes, err error) {
 	
 	resultCache, errCache := useCase.MenuRepositoryRedis.Get()
 
 	if errCache != nil {
-		menu := useCase.MenuRepositoryPostgres.GetList(ctx)
+
+		var menu []domain.Menu
+		if menu, err = useCase.MenuRepositoryPostgres.GetList(ctx); err != nil {
+			return nil, err
+		}
 	
 		for _, v := range menu {
-			menus = append(menus, domain.MenuRes{
+			response = append(response, domain.MenuRes{
 				Id: v.Id,
 				Name: v.Name,
 				Price: v.Price,
@@ -119,18 +133,18 @@ func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuR
 			})
 		}
 
-		_, errCache := useCase.MenuRepositoryRedis.Set(menus)
+		_, err = useCase.MenuRepositoryRedis.Set(response)
 
-		if errCache != nil {
-			panic(exception.NewClientError{Message: errCache.Error()})
+		if err != nil {
+			return nil, err
 		}
 		
-		return menus
+		return response, nil
 	}
 
 	
 	for _, v := range resultCache {
-		menus = append(menus, domain.MenuRes{
+		response = append(response, domain.MenuRes{
 			Id: v.Id,
 			Name: v.Name,
 			Price: v.Price,
@@ -141,17 +155,19 @@ func (useCase *menuUseCaseImpl) GetList(ctx *fiber.Ctx) (response []domain.MenuR
 		})
 	}
 
-	return menus
+	return response, nil
 	
 }
 
-
-func (useCase *menuUseCaseImpl) GetById(ctx *fiber.Ctx, id string) (response domain.MenuRes) {
+func (useCase *menuUseCaseImpl) GetById(ctx context.Context, id string) (response domain.MenuRes, err error) {
 	
-	menu := useCase.MenuRepositoryPostgres.GetById(ctx, id)
+	var menu domain.Menu
+	if menu, err = useCase.MenuRepositoryPostgres.GetById(ctx, id); err != nil {
+		return response, err
+	}
 	
 	if (menu == domain.Menu{}) {
-		panic(exception.NewClientError{Message: "menu not found"})
+		return response, fiber.NewError(fiber.ErrBadRequest.Code, "menu not found")
 	}
 
 	response = domain.MenuRes{
@@ -159,44 +175,70 @@ func (useCase *menuUseCaseImpl) GetById(ctx *fiber.Ctx, id string) (response dom
 		Name: menu.Name,
 		Price: menu.Price,
 		Stock: menu.Stock,
+		Url: menu.Url,
 		CreatedAt: menu.CreatedAt,
 		UpdatedAt: menu.UpdatedAt,
 	} 
 	
-	return response
+	return response, nil
 }
 
-// TODO : fixing update request
-func (useCase *menuUseCaseImpl) Update(ctx *fiber.Ctx, id string, request domain.MenuReq)(response domain.MenuRes) {
+func (useCase *menuUseCaseImpl) Update(ctx context.Context, id string, request *domain.MenuReq)(response domain.MenuRes, err error) {
 
-	menuReq :=  domain.Menu{
+	if errValidation := validation.MenuPayloadValidator(request); errValidation != nil {
+		return response, fiber.NewError(fiber.ErrBadRequest.Code, errValidation.Error())
+	}
+
+	var menu domain.Menu
+	if menu, err = useCase.MenuRepositoryPostgres.GetById(ctx , id); err != nil {
+		return response, err
+	}
+
+	if(menu == domain.Menu{}) {
+		return response, fiber.NewError(fiber.ErrNotFound.Code, "menu not found")
+	}
+
+	var urlImage string
+
+	if request.File == nil {
+		urlImage = menu.Url
+	}else{
+		// Upload file menggunakan Minio
+		objectName :=  strconv.FormatInt(timestamp, 16) +"-"+ request.File.Filename 
+
+		if err = minioUpload.UploadFile(request.File, bucketName, objectName); err != nil {
+			return response, err
+		}
+
+		urlImage = os.Getenv("MINIO_URL_FILE")+"/"+bucketName+"/"+objectName
+	}
+
+	// memindahkan dari request model ke entity/domain Menu
+	menuReq := domain.Menu {
+		Id: request.Id,
 		Name: strings.ToUpper(request.Name),
+		Url: urlImage,
 		Price: request.Price,
 		Stock: request.Stock,
 	}
 
-	menu := useCase.MenuRepositoryPostgres.GetById(ctx , id)
-
-	if(menu == domain.Menu{}) {
-		panic(exception.NewClientError{Message:  "menu not found"})
+	if _, err = useCase.MenuRepositoryPostgres.Update(ctx, id, &menuReq); err != nil {
+		return response, err
 	}
 
-
-	useCase.MenuRepositoryPostgres.Update(ctx, id, menuReq)
-
-	errCache := useCase.MenuRepositoryRedis.Delete()
-	exception.CheckError(errCache)
-
-	validation.MenuPayloadValidator(request)
+	if err = useCase.MenuRepositoryRedis.Delete(); err != nil {
+		return response, err
+	}
 	
 	response = domain.MenuRes{
 		Id: id,
 		Name: menuReq.Name,
 		Price: menuReq.Price,
 		Stock: menuReq.Stock,
+		Url: menuReq.Url,
 		CreatedAt: menuReq.CreatedAt,
 		UpdatedAt: menu.UpdatedAt,
 	}
 
-	return response
+	return response, nil
 }

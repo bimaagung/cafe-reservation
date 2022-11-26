@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"github.com/bimaagung/cafe-reservation/pkg/dotenv"
 	postgresdb "github.com/bimaagung/cafe-reservation/pkg/postgres"
 	redisdb "github.com/bimaagung/cafe-reservation/pkg/redis"
@@ -31,11 +33,13 @@ func main() {
 	dbPostgres := postgresdb.NewPostgresDB()
 	dbRedis := redisdb.NewRedisDB()
 
+	// Menu
 	menuRepositoryPostgres := menurepositorypostgres.NewConnectDB(dbPostgres)
 	menuRepositoryRedis := menurepositoryredis.NewRepositoryRedis(dbRedis)
-	menuUseCase := menuusecase.NewMenuUC(&menuRepositoryPostgres, &menuRepositoryRedis)
+	menuUseCase := menuusecase.NewMenuUC(menuRepositoryPostgres, menuRepositoryRedis)
 	menuController := menucontroller.NewMenuController(&menuUseCase)
 
+	// User
 	userRepository := userrepository.NewUserRepository(dbPostgres)
 	userUseCase := userusecase.NewUserUC(userRepository)
 	userController := usercontroller.NewUserController(userUseCase)
@@ -58,6 +62,8 @@ func main() {
 	menuController.Route(app)
 	userController.Route(app)
 
-	err := app.Listen(":3000")
-	exception.CheckError(err)
+	if err := app.Listen(":3000"); err != nil {
+		log.Fatal(err)
+	}
+	
 }

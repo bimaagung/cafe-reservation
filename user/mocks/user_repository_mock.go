@@ -33,12 +33,12 @@ func (m *UserRepository) GetByUsername(ctx context.Context, username string) (us
 	return r0, r1
 }
 
-func (m *UserRepository) Create(ctx context.Context, user userdomain.User)(string, error) {
+func (m *UserRepository) Create(ctx context.Context, user *userdomain.User)(string, error) {
 	ret := m.Called(ctx, user)
 
 	var r0 string
 
-	if rf, ok := ret.Get(0).(func(context.Context, userdomain.User) string); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, *userdomain.User) string); ok {
 		r0 = rf(ctx, user)
 	} else {
 		r0 = ret.Get(0).(string)
@@ -46,7 +46,7 @@ func (m *UserRepository) Create(ctx context.Context, user userdomain.User)(strin
 
 	var r1 error
 
-	if rf, ok := ret.Get(1).(func(context.Context, userdomain.User)  error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *userdomain.User)  error); ok {
 		r1 = rf(ctx, user)
 	} else {
 		r1 = ret.Error(1)

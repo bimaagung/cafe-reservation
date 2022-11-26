@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/golang-jwt/jwt"
@@ -18,7 +17,7 @@ func AuthValidate(c *fiber.Ctx) error {
 	authorization := c.Get("Authorization")
 
 	if authorization == "" {
-		panic(exception.NewUnauthorized{})
+		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
 	}
 
 	splitString := strings.Split(authorization, " ")
@@ -38,7 +37,7 @@ func AuthValidate(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
-		panic(exception.NewUnauthorized{})
+		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims);
@@ -46,7 +45,7 @@ func AuthValidate(c *fiber.Ctx) error {
 	if ok && token.Valid {
 		claimsToken = claims
 	}else {
-		panic(exception.NewUnauthorized{})
+		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
 	}
 
 	c.Locals("user", claimsToken)

@@ -5,7 +5,6 @@ import (
 	"log"
 	"mime/multipart"
 
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/minio/minio-go/v7"
 )
 
@@ -23,7 +22,7 @@ func UploadFile(file *multipart.FileHeader, bucketName, objectName string) error
 	minioClient, errClient := MinioConnection(bucketName)
 
 	if errClient != nil {
-		exception.CheckError(errClient)
+		return errClient
 	}
 
 	fileBuffer := buffer

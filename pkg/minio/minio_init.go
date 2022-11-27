@@ -1,17 +1,15 @@
-package minioUpload
+package miniodb
 
 import (
-	"context"
 	"log"
 	"os"
 
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
 
-func MinioConnection(bucketName string) (*minio.Client, error) {
-	ctx := context.Background()
+func MinioConnection() (*minio.Client) {
+	
 	endpoint := os.Getenv("MINIO_ENDPOINT")
 	accessKeyID := os.Getenv("MINIO_ACCESSKEY")
 	secretAccessKey := os.Getenv("MINIO_SECRETKEY")
@@ -24,28 +22,9 @@ func MinioConnection(bucketName string) (*minio.Client, error) {
 
 	if errInit != nil {
 		log.Fatalln(errInit)
-		exception.CheckError(errInit)
 	}
 
 	log.Printf("%#v\n", minioClient) // minioClient is now setup
 
-	location := "us-east-1"
-
-	// Create a bucket at region 'us-east-1' with object locking enabled.
-	err := minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{Region: location})
-	if err != nil {
-		 exists, errBucketExists := minioClient.BucketExists(ctx, bucketName)
-        if errBucketExists == nil && exists {
-            log.Printf("We already own %s\n", bucketName)
-        } else {
-            log.Fatalln(err)
-			exception.CheckError(err)
-        }
-
-	} else {
-        log.Printf("Successfully created %s\n", bucketName)
-    }
-	
-	return minioClient, errInit
-
+	return minioClient
 }

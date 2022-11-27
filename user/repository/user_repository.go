@@ -7,6 +7,6 @@ import (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user userdomain.User) (string, error) 
+	Create(ctx context.Context, user *userdomain.User) (string, error) 
 	GetByUsername(ctx context.Context, username string) (userdomain.User, error)
 }

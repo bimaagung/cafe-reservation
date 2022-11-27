@@ -2,11 +2,10 @@ package validation
 
 import (
 	"github.com/bimaagung/cafe-reservation/menu/domain"
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 
-func MenuPayloadValidator(request domain.MenuReq){
+func MenuPayloadValidator(request *domain.MenuReq) error {
 	err := validation.ValidateStruct(&request, 
 		validation.Field(&request.Id, validation.Required),
 		validation.Field(&request.Name, validation.Required),
@@ -14,7 +13,9 @@ func MenuPayloadValidator(request domain.MenuReq){
 		validation.Field(&request.Stock, validation.Required),
 	)
 
-	if err != nil {
-		panic(exception.NewClientError{Message: err.Error()})
+	if err != err {
+		return err
 	}
+
+	return nil
 }

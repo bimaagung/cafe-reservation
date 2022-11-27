@@ -25,7 +25,7 @@ type userUseCaseImpl struct {
 	UserRepository repository.UserRepository
 }
 
-func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.UserReq)(response userdomain.UserRes, err error){
+func (useCase *userUseCaseImpl) Create(ctx context.Context, request *userdomain.UserReq)(response userdomain.UserRes, err error){
 
 	// Check match password
 	if request.Password != request.RetypePassword {
@@ -53,7 +53,7 @@ func (useCase *userUseCaseImpl) Create(ctx context.Context, request userdomain.U
 		return response, fiber.NewError(fiber.ErrBadRequest.Code, "user already exists")
 	}
 	
-	if _, err = useCase.UserRepository.Create(ctx, user); err != nil {
+	if _, err = useCase.UserRepository.Create(ctx, &user); err != nil {
 		return response, err
 	}
 

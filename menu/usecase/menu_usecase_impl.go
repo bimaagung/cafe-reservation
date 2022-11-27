@@ -8,18 +8,19 @@ import (
 	"time"
 
 	"github.com/bimaagung/cafe-reservation/menu/domain"
+	repoitoryminio "github.com/bimaagung/cafe-reservation/menu/repository/minio"
 	repoitorypostgres "github.com/bimaagung/cafe-reservation/menu/repository/postgres"
 	repoitoryredis "github.com/bimaagung/cafe-reservation/menu/repository/redis"
 	"github.com/bimaagung/cafe-reservation/menu/validation"
-	minioUpload "github.com/bimaagung/cafe-reservation/pkg/minio"
 	"github.com/gofiber/fiber/v2"
 )
 
 // menerima repository dan disimpan ke struct menuUseCase
-func NewMenuUC(menuRepositoryPostgres repoitorypostgres.MenuRepository, menuRepositoryRedis repoitoryredis.MenuRepositoryRedis) MenuUseCase {
+func NewMenuUC(menuRepositoryPostgres repoitorypostgres.MenuRepository, menuRepositoryRedis repoitoryredis.MenuRepositoryRedis, menuRepositoryMinio repoitoryminio.MinioRepository) MenuUseCase {
 	return &menuUseCaseImpl{
 		MenuRepositoryPostgres: menuRepositoryPostgres,
 		MenuRepositoryRedis: menuRepositoryRedis,
+		MenuRepositoryMinio: menuRepositoryMinio,
 	} 
 }
 
@@ -28,6 +29,7 @@ func NewMenuUC(menuRepositoryPostgres repoitorypostgres.MenuRepository, menuRepo
 type menuUseCaseImpl struct {
 	MenuRepositoryPostgres repoitorypostgres.MenuRepository
 	MenuRepositoryRedis repoitoryredis.MenuRepositoryRedis
+	MenuRepositoryMinio repoitoryminio.MinioRepository
 }
 
 var bucketName = "menu"
@@ -43,7 +45,7 @@ func (useCase *menuUseCaseImpl) Add(ctx context.Context, request *domain.MenuReq
 	objectName :=  strconv.FormatInt(timestamp, 16) +"-"+ request.File.Filename
 	
 	// Upload file menggunakan Minio
-	if err = minioUpload.UploadFile(request.File, bucketName, objectName); err != nil {
+	if err = useCase.MenuRepositoryMinio.Upload(request.File, bucketName, objectName); err != nil {
 		return response, err
 	}
 
@@ -206,7 +208,7 @@ func (useCase *menuUseCaseImpl) Update(ctx context.Context, id string, request *
 		// Upload file menggunakan Minio
 		objectName :=  strconv.FormatInt(timestamp, 16) +"-"+ request.File.Filename 
 
-		if err = minioUpload.UploadFile(request.File, bucketName, objectName); err != nil {
+		if err = useCase.MenuRepositoryMinio.Upload(request.File, bucketName, objectName); err != nil {
 			return response, err
 		}
 

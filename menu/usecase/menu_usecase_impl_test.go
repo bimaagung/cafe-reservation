@@ -17,7 +17,7 @@ import (
 
 const patchEnv = "../../.env"
 
-func TestAddMenuUseCase(t *testing.T) {
+func TestMenuUC_Add(t *testing.T) {
 	godotenv.Load(patchEnv)
 
 	mockMenuRepoPostgres := new(mocks.MenuRepositoryPostgresMock) 

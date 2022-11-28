@@ -15,7 +15,7 @@ import (
 
 const patchEnv = "../../.env"
 
-func Test_userUseCaseImpl_Create(t *testing.T) {
+func TestUserUC_Create(t *testing.T) {
 	godotenv.Load(patchEnv)
 	
 	mockUserRepo := new(mocks.UserRepository)

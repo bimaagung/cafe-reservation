@@ -20,38 +20,39 @@ make run
 
 ## 📁 Project Structure
 
-+---.vscode
-+---bin
-+---database
-|   \---migration
-+---menu
-|   +---controller
-|   +---domain
-|   +---mocks
-|   +---repository
-|   |   +---minio
-|   |   +---postgres
-|   |   \---redis
-|   +---usecase
-|   \---validation
-+---middleware
-|   \---authorization
-+---pkg
-|   +---dotenv
-|   +---minio
-|   +---postgres
-|   \---redis
-+---user
-|   +---controller
-|   +---domain
-|   +---mocks
-|   +---repository
-|   \---usecase
-\---utils
-    +---exception
-    +---response
-    \---token_manager
-    
+```
+        +---.vscode
+        +---bin
+        +---database
+        |   \---migration
+        +---menu
+        |   +---controller
+        |   +---domain
+        |   +---mocks
+        |   +---repository
+        |   |   +---minio
+        |   |   +---postgres
+        |   |   \---redis
+        |   +---usecase
+        |   \---validation
+        +---middleware
+        |   \---authorization
+        +---pkg
+        |   +---dotenv
+        |   +---minio
+        |   +---postgres
+        |   \---redis
+        +---user
+        |   +---controller
+        |   +---domain
+        |   +---mocks
+        |   +---repository
+        |   \---usecase
+        \---utils
+            +---exception
+            +---response
+            \---token_manager
+```
 
 ## 💻 Built with
 

@@ -2,6 +2,17 @@
 Mini project which focus for development application cafe shop, which is the application is used for customer can table reservation and order menus in the cafe shop.
 Another feature on application is can manage menus, customer and can see transactions which is running.
 
+<br>
+
+## 🔍 Entity Relationship Diagram
+
+<div align="center">
+  
+  <img src="https://raw.githubusercontent.com/bimaagung/cafe-reservation/master/erd.png" width="600">
+
+</div>
+
+
 ## 🛠️ Installation Steps
 
 ### Installation project
@@ -14,6 +25,20 @@ git clone https://github.com/bimaagung/cafe-reservation.git
 running app
 ```bson 
 make run
+```
+
+<br>
+
+## 🧪 Testing
+- Test Coverage
+```bson
+    go test -v ./... -coverprofile profile.out
+```
+```bson
+    go tool cover -func profile.out // per function
+```
+```bson
+    go tool cover -html profile.out // view html
 ```
 
 <br>
@@ -65,15 +90,6 @@ make run
 - APM ELK
 
 
-## Testing
-- Test Coverage
-```bson
-    go test -v ./... -coverprofile profile.out
-```
-```bson
-    go tool cover -func profile.out // per function
-```
-```bson
-    go tool cover -html profile.out // view html
-```
+
+
 

@@ -1,10 +1,9 @@
-package controller
+package http
 
 import (
 	"fmt"
 
-	"github.com/bimaagung/cafe-reservation/menu/domain"
-	"github.com/bimaagung/cafe-reservation/menu/usecase"
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/middleware/authorization"
 
 	"github.com/bimaagung/cafe-reservation/utils/response"
@@ -13,13 +12,13 @@ import (
 )
 
 // Membawa usecase ke controller dan disimpan ke struct Menu
-func NewMenuController(menuUseCase *usecase.MenuUseCase) Menu {
+func NewMenuController(menuUseCase *domain.MenuUseCase) Menu {
 	return Menu{MenuUseCase: *menuUseCase}
 }
 
 // Tempat menyimpan menu usecase
 type Menu struct {
-	MenuUseCase usecase.MenuUseCase
+	MenuUseCase domain.MenuUseCase
 }
 
 func (controller *Menu) Route(app *fiber.App) {

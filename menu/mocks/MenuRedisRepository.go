@@ -1,15 +1,15 @@
 package mocks
 
 import (
-	"github.com/bimaagung/cafe-reservation/menu/domain"
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/stretchr/testify/mock"
 )
 
-type MenuRepositoryRedisMock struct {
+type MenuRedisRepository struct {
 	mock.Mock
 }
 
-func (m *MenuRepositoryRedisMock) Set(menu interface{})(string, error){
+func (m *MenuRedisRepository) Set(menu interface{})(string, error){
 	ret := m.Called(menu)
 
 	var r0 string
@@ -31,7 +31,7 @@ func (m *MenuRepositoryRedisMock) Set(menu interface{})(string, error){
 	return r0, r1
 }
 
-func (m *MenuRepositoryRedisMock) Get()([]domain.Menu, error){
+func (m *MenuRedisRepository) Get()([]domain.Menu, error){
 	ret := m.Called()
 
 	var r0 []domain.Menu
@@ -53,7 +53,7 @@ func (m *MenuRepositoryRedisMock) Get()([]domain.Menu, error){
 	return r0, r1
 }
 
-func (m *MenuRepositoryRedisMock) Delete()error{
+func (m *MenuRedisRepository) Delete()error{
 	ret := m.Called()
 
 	var r0 error

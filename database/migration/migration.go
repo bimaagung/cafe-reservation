@@ -1,10 +1,9 @@
 package main
 
 import (
-	menudomain "github.com/bimaagung/cafe-reservation/menu/domain"
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/pkg/dotenv"
 	postgresdb "github.com/bimaagung/cafe-reservation/pkg/postgres"
-	userdomain "github.com/bimaagung/cafe-reservation/user/domain"
 )
 
 func init(){
@@ -13,5 +12,5 @@ func init(){
 
 func main() {
 	database := postgresdb.NewPostgresDB()
-	database.AutoMigrate(&menudomain.Menu{}, &userdomain.User{})
+	database.AutoMigrate(&domain.Menu{}, &domain.User{})
 }

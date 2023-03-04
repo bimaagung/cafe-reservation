@@ -6,11 +6,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MenuRepositoryMinioMock struct {
+type MenuMinioRepository struct {
 	mock.Mock
 }
 
-func (m *MenuRepositoryMinioMock) Upload(file *multipart.FileHeader, bucketName string, objectName string) error{
+func (m *MenuMinioRepository) Upload(file *multipart.FileHeader, bucketName string, objectName string) error{
 	ret := m.Called(file, bucketName, objectName)
 
 	var r0 error

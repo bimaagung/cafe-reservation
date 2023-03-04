@@ -12,7 +12,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	// menu
-	menucontroller "github.com/bimaagung/cafe-reservation/menu/controller"
+	menuhandle "github.com/bimaagung/cafe-reservation/menu/handle/http"
 	menurepositoryminio "github.com/bimaagung/cafe-reservation/menu/repository/minio"
 	menurepositorypostgres "github.com/bimaagung/cafe-reservation/menu/repository/postgres"
 	menurepositoryredis "github.com/bimaagung/cafe-reservation/menu/repository/redis"
@@ -20,8 +20,8 @@ import (
 	"github.com/bimaagung/cafe-reservation/utils/exception"
 
 	// user
-	usercontroller "github.com/bimaagung/cafe-reservation/user/controller"
-	userrepository "github.com/bimaagung/cafe-reservation/user/repository"
+	userhandle "github.com/bimaagung/cafe-reservation/user/handle/http"
+	userrepository "github.com/bimaagung/cafe-reservation/user/repository/postgres"
 	userusecase "github.com/bimaagung/cafe-reservation/user/usecase"
 
 	"go.elastic.co/apm/module/apmfiber/v2"
@@ -43,12 +43,12 @@ func main() {
 	menuRepositoryMinio := menurepositoryminio.NewMinioRepository(dbMinio)
 
 	menuUseCase := menuusecase.NewMenuUC(menuRepositoryPostgres, menuRepositoryRedis, menuRepositoryMinio)
-	menuController := menucontroller.NewMenuController(&menuUseCase)
+	menuController := menuhandle.NewMenuController(&menuUseCase)
 
 	// User
 	userRepository := userrepository.NewUserRepository(dbPostgres)
 	userUseCase := userusecase.NewUserUC(userRepository)
-	userController := usercontroller.NewUserController(userUseCase)
+	userController := userhandle.NewUserController(userUseCase)
 	
 
 	app := fiber.New(

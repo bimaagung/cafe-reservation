@@ -1,4 +1,4 @@
-package repository
+package minio
 
 import (
 	"context"
@@ -6,10 +6,11 @@ import (
 	"mime/multipart"
 	"os"
 
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/minio/minio-go/v7"
 )
 
-func NewMinioRepository(minioConnection *minio.Client) MinioRepository { 
+func NewMinioRepository(minioConnection *minio.Client) domain.MinioRepository{ 
 	return &minioRepositoryImpl{
 		MinioConnection: minioConnection,
 	}

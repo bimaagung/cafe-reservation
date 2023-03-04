@@ -1,7 +1,7 @@
 package validation
 
 import (
-	"github.com/bimaagung/cafe-reservation/menu/domain"
+	"github.com/bimaagung/cafe-reservation/domain"
 	validation "github.com/go-ozzo/ozzo-validation"
 )
 

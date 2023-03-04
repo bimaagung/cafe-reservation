@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bimaagung/cafe-reservation/menu/domain"
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/menu/mocks"
 	"github.com/bimaagung/cafe-reservation/menu/usecase"
 	"github.com/joho/godotenv"
@@ -20,9 +20,9 @@ const patchEnv = "../../.env"
 func TestMenuUC_Add(t *testing.T) {
 	godotenv.Load(patchEnv)
 
-	mockMenuRepoPostgres := new(mocks.MenuRepositoryPostgresMock) 
-	mockMenuRepoRedis := new(mocks.MenuRepositoryRedisMock) 
-	mockMenuRepoMinio := new(mocks.MenuRepositoryMinioMock) 
+	mockMenuRepoPostgres := new(mocks.MenuPostgresRepository) 
+	mockMenuRepoRedis := new(mocks.MenuRedisRepository) 
+	mockMenuRepoMinio := new(mocks.MenuMinioRepository) 
 	
 	mockMenuReq := domain.MenuReq{
 		Id: "97391bbb-a48f-48e2-a166-db669e6377fc",

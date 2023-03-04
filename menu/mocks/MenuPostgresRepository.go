@@ -3,15 +3,15 @@ package mocks
 import (
 	"context"
 
-	"github.com/bimaagung/cafe-reservation/menu/domain"
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/stretchr/testify/mock"
 )
 
-type MenuRepositoryPostgresMock struct {
+type MenuPostgresRepository struct {
 	mock.Mock
 }
 
-func (m *MenuRepositoryPostgresMock) Add(ctx context.Context, menu *domain.Menu)(string, error){
+func (m *MenuPostgresRepository) Add(ctx context.Context, menu *domain.Menu)(string, error){
 	ret := m.Called(ctx, menu)
 
 	var r0 string
@@ -33,7 +33,7 @@ func (m *MenuRepositoryPostgresMock) Add(ctx context.Context, menu *domain.Menu)
 	return r0, r1
 }
 
-func (m *MenuRepositoryPostgresMock) GetList(ctx context.Context)([]domain.Menu, error){
+func (m *MenuPostgresRepository) GetList(ctx context.Context)([]domain.Menu, error){
 	ret := m.Called(ctx)
 
 	var r0 []domain.Menu
@@ -55,7 +55,7 @@ func (m *MenuRepositoryPostgresMock) GetList(ctx context.Context)([]domain.Menu,
 	return r0, r1
 }
 
-func (m *MenuRepositoryPostgresMock) Delete(ctx context.Context, id string)error{
+func (m *MenuPostgresRepository) Delete(ctx context.Context, id string)error{
 	ret := m.Called(ctx, id)
 
 	var r0 error
@@ -69,7 +69,7 @@ func (m *MenuRepositoryPostgresMock) Delete(ctx context.Context, id string)error
 	return r0
 }
 
-func (m *MenuRepositoryPostgresMock) GetByName(ctx context.Context, name string)(domain.Menu, error) {
+func (m *MenuPostgresRepository) GetByName(ctx context.Context, name string)(domain.Menu, error) {
 	ret := m.Called(ctx, name)
 
 	var r0 domain.Menu
@@ -91,7 +91,7 @@ func (m *MenuRepositoryPostgresMock) GetByName(ctx context.Context, name string)
 	return r0, r1
 }
 
-func (m *MenuRepositoryPostgresMock) GetById(ctx context.Context, id string)(domain.Menu, error) {
+func (m *MenuPostgresRepository) GetById(ctx context.Context, id string)(domain.Menu, error) {
 	ret := m.Called(ctx, id)
 
 	var r0 domain.Menu
@@ -113,7 +113,7 @@ func (m *MenuRepositoryPostgresMock) GetById(ctx context.Context, id string)(dom
 	return r0, r1
 }
 
-func (m *MenuRepositoryPostgresMock) Update (ctx context.Context, id string, menu *domain.Menu)(string, error){
+func (m *MenuPostgresRepository) Update (ctx context.Context, id string, menu *domain.Menu)(string, error){
 	ret := m.Called(ctx, id,menu)
 
 	var r0 string

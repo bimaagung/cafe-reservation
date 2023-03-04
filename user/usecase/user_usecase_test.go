@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/bimaagung/cafe-reservation/user/domain"
-	"github.com/bimaagung/cafe-reservation/user/mocks"
+	"github.com/bimaagung/cafe-reservation/domain"
+
+	"github.com/bimaagung/cafe-reservation/user/repository/mocks"
 	"github.com/bimaagung/cafe-reservation/user/usecase"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"

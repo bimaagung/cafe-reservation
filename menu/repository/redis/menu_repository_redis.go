@@ -1,15 +1,15 @@
-package repository
+package redis
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
 
-	"github.com/bimaagung/cafe-reservation/menu/domain"
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/go-redis/redis/v8"
 )
 
-func NewRepositoryRedis(redisDB *redis.Client) MenuRepositoryRedis {
+func NewRepositoryRedis(redisDB *redis.Client) domain.MenuRepositoryRedis {
 	return &redisMenuRepository{
 		redisDB: redisDB,
 	} 

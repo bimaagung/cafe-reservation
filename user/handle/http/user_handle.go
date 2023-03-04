@@ -1,19 +1,18 @@
-package controller
+package http
 
 import (
-	"github.com/bimaagung/cafe-reservation/user/domain"
-	"github.com/bimaagung/cafe-reservation/user/usecase"
+	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/utils/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 )
 
-func NewUserController(userUseCae usecase.UserUseCase) User {
+func NewUserController(userUseCae domain.UserUseCase) User {
 	return User{UserUseCase: userUseCae}
 }
 
 type User struct {
-	UserUseCase usecase.UserUseCase
+	UserUseCase domain.UserUseCase
 }
 
 func (controller *User) Route(app *fiber.App) {

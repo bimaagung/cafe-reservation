@@ -21,10 +21,10 @@ type Menu struct {
 }
 
 type MenuReq struct {
-	Id    string `json:"id,omitempty"`
-	Name  string `json:"name,omitempty"` 
-	Price int64 `json:"price,omitempty"`
-	Stock int `json:"stock,omitempty"`
+	Id    string `json:"id"`
+	Name  string `json:"name"` 
+	Price int64 `json:"price"`
+	Stock int `json:"stock"`
 	File *multipart.FileHeader
 }
 

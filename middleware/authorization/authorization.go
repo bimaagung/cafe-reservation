@@ -2,25 +2,33 @@ package authorization
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/bimaagung/cafe-reservation/utils/response"
+	"github.com/gin-gonic/gin"
 
 	"github.com/golang-jwt/jwt"
 )
 
-func AuthValidate(c *fiber.Ctx) error {
+func AuthValidate(c *gin.Context) {
 
 	var claimsToken jwt.MapClaims
 	var getToken string
-	authorization := c.Get("Authorization")
+	authorization := c.Request.Header["Authorization"]
 
-	if authorization == "" {
-		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+	log.Println(authorization)
+
+	if len(authorization) < 1 {
+		c.JSON(401, response.ErrorRes{
+			Status: "fail",
+			Message: "unauthorized 1",
+		})
+		return
 	}
 
-	splitString := strings.Split(authorization, " ")
+	splitString := strings.Split(authorization[0], " ")
 
 	if(len(splitString) < 2) {
 		getToken = splitString[0]
@@ -37,7 +45,11 @@ func AuthValidate(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
-		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+		c.JSON(401, response.ErrorRes{
+			Status: "fail",
+			Message: "unauthorized 2",
+		})
+		return
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims);
@@ -45,10 +57,15 @@ func AuthValidate(c *fiber.Ctx) error {
 	if ok && token.Valid {
 		claimsToken = claims
 	}else {
-		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+		c.JSON(401, response.ErrorRes{
+			Status: "fail",
+			Message: "unauthorized 3",
+		})
+		return
 	}
-
-	c.Locals("user", claimsToken)
 	
-	return c.Next()
+	// pasing value
+	c.Set("user", claimsToken)
+	
+	c.Next()
 }

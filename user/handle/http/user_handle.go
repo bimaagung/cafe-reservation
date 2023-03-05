@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/bimaagung/cafe-reservation/domain"
 	"github.com/bimaagung/cafe-reservation/utils/response"
-	"github.com/gofiber/fiber/v2"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -15,30 +15,36 @@ type User struct {
 	UserUseCase domain.UserUseCase
 }
 
-func (controller *User) Route(app *fiber.App) {
+func (controller *User) Route(app *gin.Engine) {
 	api := app.Group("/api")
 
-	api.Post("/auth/register", controller.Register)
+	api.POST("/auth/register", controller.Register)
 }
 
-func (controller *User) Register(c *fiber.Ctx) error {
-	
-	var ctx = c.Context()
+func (controller *User) Register(c *gin.Context) {
 	var request domain.UserReq
 
 	request.Id = uuid.New().String()
 	
-	if err := c.BodyParser(&request); err != nil {
-		return fiber.NewError(fiber.ErrBadRequest.Code, err.Error())
+	if err := c.BindJSON(&request); err != nil {
+		c.JSON(400, response.ErrorRes{
+			Status: "fail",
+			Message: err.Error(),
+		})
+		return
 	}
 
-	result, err := controller.UserUseCase.Create(ctx, &request)
+	result, err := controller.UserUseCase.Create(c, &request)
 
 	if err != nil {
-		return err
+		c.JSON(400, response.ErrorRes{
+			Status: "fail",
+			Message: err.Error(),
+		})
+		return
 	}
 
-	return c.Status(fiber.StatusOK).JSON(response.SuccessRes{
+	c.JSON(200, response.SuccessRes{
 		Status: "ok",
 		Message: "success",
 		Data: result,

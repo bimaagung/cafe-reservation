@@ -3,13 +3,12 @@ package main
 import (
 	"log"
 
+	"github.com/bimaagung/cafe-reservation/middleware/exception"
 	"github.com/bimaagung/cafe-reservation/pkg/dotenv"
 	miniodb "github.com/bimaagung/cafe-reservation/pkg/minio"
 	postgresdb "github.com/bimaagung/cafe-reservation/pkg/postgres"
 	redisdb "github.com/bimaagung/cafe-reservation/pkg/redis"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/recover"
+	"github.com/gin-gonic/gin"
 
 	// menu
 	menuhandle "github.com/bimaagung/cafe-reservation/menu/handle/http"
@@ -17,14 +16,11 @@ import (
 	menurepositorypostgres "github.com/bimaagung/cafe-reservation/menu/repository/postgres"
 	menurepositoryredis "github.com/bimaagung/cafe-reservation/menu/repository/redis"
 	menuusecase "github.com/bimaagung/cafe-reservation/menu/usecase"
-	"github.com/bimaagung/cafe-reservation/utils/exception"
 
 	// user
 	userhandle "github.com/bimaagung/cafe-reservation/user/handle/http"
 	userrepository "github.com/bimaagung/cafe-reservation/user/repository/postgres"
 	userusecase "github.com/bimaagung/cafe-reservation/user/usecase"
-
-	"go.elastic.co/apm/module/apmfiber/v2"
 )
 
 func init(){
@@ -51,24 +47,23 @@ func main() {
 	userController := userhandle.NewUserController(userUseCase)
 	
 
-	app := fiber.New(
-		fiber.Config{
-			ErrorHandler: exception.ErrorHandler,
-		},
-	)
+	app := gin.Default()
+	app.Use(gin.CustomRecovery(exception.ErrorHandler))
 
-	app.Use(apmfiber.Middleware())
-	app.Use(recover.New())
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, world!")
+	app.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"message": "Hello World",
+		})
 	})
 
 
 	menuController.Route(app)
 	userController.Route(app)
 
-	if err := app.Listen(":3000"); err != nil {
+	
+
+	err := app.Run(":3000")
+	if err != nil {
 		log.Fatal(err)
 	}
 	

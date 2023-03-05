@@ -27,6 +27,16 @@ func (controller *Menu) Route(app *gin.Engine) {
 	app.DELETE("/api/menu/:id", authorization.AuthValidate, controller.Delete)
 }
 
+
+// PingExample godoc
+// @Summary ping example
+// @Schemes
+// @Description do ping
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Success 200 {string} Helloworld
+// @Router /api/menu [post]
 func (controller *Menu) Insert(c *gin.Context) {
 	var request domain.MenuReq
 	request.Id = uuid.New().String()

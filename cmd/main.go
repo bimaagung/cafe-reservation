@@ -21,6 +21,10 @@ import (
 	userhandle "github.com/bimaagung/cafe-reservation/user/handle/http"
 	userrepository "github.com/bimaagung/cafe-reservation/user/repository/postgres"
 	userusecase "github.com/bimaagung/cafe-reservation/user/usecase"
+
+	docs "github.com/bimaagung/cafe-reservation/docs"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func init(){
@@ -48,6 +52,7 @@ func main() {
 	
 
 	app := gin.Default()
+	docs.SwaggerInfo.BasePath = "/api/v1"
 	app.Use(gin.CustomRecovery(exception.ErrorHandler))
 
 	app.GET("/", func(c *gin.Context) {
@@ -56,12 +61,11 @@ func main() {
 		})
 	})
 
+	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler)) // http://localhost:3000/swagger/index.html
 
 	menuController.Route(app)
 	userController.Route(app)
-
 	
-
 	err := app.Run(":3000")
 	if err != nil {
 		log.Fatal(err)

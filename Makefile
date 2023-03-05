@@ -3,3 +3,6 @@ build:
 
 run:
 	go run cmd/main.go
+
+gen-swagger:
+	swag init -g cmd/main.go

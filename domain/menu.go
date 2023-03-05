@@ -29,13 +29,13 @@ type MenuReq struct {
 }
 
 type MenuRes struct {
-	Id    string `json:"id"`
-	Name  string `json:"name" validate:"required"` 
-	Price int64 `json:"price" validate:"required"`
-	Stock int `json:"stock" validate:"required"`
-	Url  string `json:"url" validate:"required"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Id    string `json:"id" example:"random"`
+	Name  string `json:"name" validate:"required" example:"Cappucino"` 
+	Price int64 `json:"price" validate:"required" example:"15000"`
+	Stock int `json:"stock" validate:"required" example:"10"`
+	Url  string `json:"url" validate:"required" example:"{url}/image.jpg"`
+	CreatedAt time.Time `json:"created_at" example:"10/10/2022 11:13:00"`
+	UpdatedAt time.Time `json:"updated_at" example:"10/10/2022 11:13:00"`
 }
 
 type MenuUseCase interface {

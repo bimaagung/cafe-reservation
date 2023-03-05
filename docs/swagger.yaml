@@ -1,19 +1,160 @@
+basePath: /api/
+definitions:
+  domain.MenuRes:
+    properties:
+      created_at:
+        example: 10/10/2022 11:13:00
+        type: string
+      id:
+        example: random
+        type: string
+      name:
+        example: Cappucino
+        type: string
+      price:
+        example: 15000
+        type: integer
+      stock:
+        example: 10
+        type: integer
+      updated_at:
+        example: 10/10/2022 11:13:00
+        type: string
+      url:
+        example: '{url}/image.jpg'
+        type: string
+    required:
+    - name
+    - price
+    - stock
+    - url
+    type: object
+  response.SuccessRes:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+host: localhost:3000
 info:
-  contact: {}
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a cafe reservation server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Cafe Reservation API
+  version: "1.0"
 paths:
   /api/menu:
+    delete:
+      consumes:
+      - application/json
+      description: delete menu
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: desc
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessRes'
+            - properties:
+                ' Message':
+                  type: string
+                Status:
+                  type: string
+              type: object
+      tags:
+      - Menu
     post:
       consumes:
       - application/json
-      description: do ping
+      description: add menu
+      parameters:
+      - description: name menu
+        example: Cappucino
+        in: formData
+        name: Name
+        required: true
+        type: string
+      - description: price menu
+        example: 15000
+        in: formData
+        name: Price
+        required: true
+        type: integer
+      - description: count stock menu
+        example: 10
+        in: formData
+        name: Stock
+        required: true
+        type: integer
+      - description: Upload cover image menu
+        in: formData
+        name: Image
+        required: true
+        type: file
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
-      summary: ping example
+            $ref: '#/definitions/domain.MenuRes'
+      tags:
+      - Menu
+    put:
+      consumes:
+      - application/json
+      description: update menu
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: name menu
+        example: Cappucino
+        in: formData
+        name: Name
+        required: true
+        type: string
+      - description: price menu
+        example: 15000
+        in: formData
+        name: Price
+        required: true
+        type: integer
+      - description: count stock menu
+        example: 10
+        in: formData
+        name: Stock
+        required: true
+        type: integer
+      - description: Upload cover image menu
+        in: formData
+        name: Image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.MenuRes'
       tags:
       - Menu
 swagger: "2.0"

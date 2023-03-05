@@ -28,14 +28,17 @@ func (controller *Menu) Route(app *gin.Engine) {
 }
 
 
-// PingExample godoc
-// @Summary ping example
+// AddMenu godoc
 // @Schemes
-// @Description do ping
+// @Description add menu
 // @Tags Menu
 // @Accept json
 // @Produce json
-// @Success 200 {string} Helloworld
+// @Param   Name  formData     string     true  "name menu"       example(Cappucino)
+// @Param   Price  formData     int     true  "price menu"       example(15000)
+// @Param   Stock  formData     int     true  "count stock menu"       example(10)
+// @Param Image formData file true "Upload cover image menu"
+// @Success 200 {object} domain.MenuRes
 // @Router /api/menu [post]
 func (controller *Menu) Insert(c *gin.Context) {
 	var request domain.MenuReq
@@ -76,6 +79,15 @@ func (controller *Menu) Insert(c *gin.Context) {
 	})
 }
 
+// DeleteMenu godoc
+// @Schemes
+// @Description delete menu
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Param id   path int true "Menu ID"
+// @Success 200 {object} response.SuccessRes{Status=string, Message=string} "desc"
+// @Router /api/menu [delete]
 func (controller *Menu) Delete(c *gin.Context) {
 	id := c.Param("id")
 
@@ -131,6 +143,20 @@ func (controller *Menu) GetById(c *gin.Context) {
 	 })
 }
 
+
+// UpdateMenu godoc
+// @Schemes
+// @Description update menu
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Param id   path int true "Menu ID"
+// @Param   Name  formData     string     true  "name menu"       example(Cappucino)
+// @Param   Price  formData     int     true  "price menu"       example(15000)
+// @Param   Stock  formData     int     true  "count stock menu"       example(10)
+// @Param Image formData file true "Upload cover image menu"
+// @Success 200 {object} domain.MenuRes
+// @Router /api/menu [put]
 func (controller *Menu) Update(c *gin.Context) {
 	var request domain.MenuReq
 	id := c.Param("id")

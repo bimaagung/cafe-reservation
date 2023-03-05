@@ -9,15 +9,24 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "API Support",
+            "url": "http://www.swagger.io/support",
+            "email": "support@swagger.io"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/menu": {
-            "post": {
-                "description": "do ping",
+            "put": {
+                "description": "update menu",
                 "consumes": [
                     "application/json"
                 ],
@@ -27,14 +36,203 @@ const docTemplate = `{
                 "tags": [
                     "Menu"
                 ],
-                "summary": "ping example",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Menu ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "example": "Cappucino",
+                        "description": "name menu",
+                        "name": "Name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 15000,
+                        "description": "price menu",
+                        "name": "Price",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "count stock menu",
+                        "name": "Stock",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload cover image menu",
+                        "name": "Image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/domain.MenuRes"
                         }
                     }
+                }
+            },
+            "post": {
+                "description": "add menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "parameters": [
+                    {
+                        "type": "string",
+                        "example": "Cappucino",
+                        "description": "name menu",
+                        "name": "Name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 15000,
+                        "description": "price menu",
+                        "name": "Price",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "example": 10,
+                        "description": "count stock menu",
+                        "name": "Stock",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Upload cover image menu",
+                        "name": "Image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.MenuRes"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete menu",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Menu"
+                ],
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Menu ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "desc",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.SuccessRes"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        " Message": {
+                                            "type": "string"
+                                        },
+                                        "Status": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.MenuRes": {
+            "type": "object",
+            "required": [
+                "name",
+                "price",
+                "stock",
+                "url"
+            ],
+            "properties": {
+                "created_at": {
+                    "type": "string",
+                    "example": "10/10/2022 11:13:00"
+                },
+                "id": {
+                    "type": "string",
+                    "example": "random"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Cappucino"
+                },
+                "price": {
+                    "type": "integer",
+                    "example": 15000
+                },
+                "stock": {
+                    "type": "integer",
+                    "example": 10
+                },
+                "updated_at": {
+                    "type": "string",
+                    "example": "10/10/2022 11:13:00"
+                },
+                "url": {
+                    "type": "string",
+                    "example": "{url}/image.jpg"
+                }
+            }
+        },
+        "response.SuccessRes": {
+            "type": "object",
+            "properties": {
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         }
@@ -43,12 +241,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
+	Version:          "1.0",
+	Host:             "localhost:3000",
+	BasePath:         "/api/",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Cafe Reservation API",
+	Description:      "This is a cafe reservation server.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

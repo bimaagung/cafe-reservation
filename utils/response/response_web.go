@@ -6,7 +6,7 @@ type ErrorRes struct {
 }
 
 type SuccessRes struct {
-	Status  string      `json:"status"`
-	Message string      `json:"message"`
+	Status  string      `json:"status" example:"ok"`
+	Message string      `json:"message" example:"success"`
 	Data    interface{} `json:"data"`
 }

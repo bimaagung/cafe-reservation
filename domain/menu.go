@@ -25,7 +25,7 @@ type MenuReq struct {
 	Name  string `form:"name"` 
 	Price int64 `form:"price"`
 	Stock int `form:"stock"`
-	File *multipart.FileHeader
+	File *multipart.FileHeader `form:"file" format:"binary"`
 }
 
 type MenuRes struct {
@@ -33,7 +33,7 @@ type MenuRes struct {
 	Name  string `json:"name" validate:"required" example:"Cappucino"` 
 	Price int64 `json:"price" validate:"required" example:"15000"`
 	Stock int `json:"stock" validate:"required" example:"10"`
-	Url  string `json:"url" validate:"required" example:"{url}/image.jpg"`
+	Url  string `json:"url" validate:"required" example:"http://127.0.0.1:9000/menu/64068897-1182718.png"`
 	CreatedAt time.Time `json:"created_at" example:"10/10/2022 11:13:00"`
 	UpdatedAt time.Time `json:"updated_at" example:"10/10/2022 11:13:00"`
 }

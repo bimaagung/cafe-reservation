@@ -46,6 +46,10 @@ func init(){
 // @host      localhost:3000
 // @BasePath  /api/
 
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 // @externalDocs.description  OpenAPI
 // @externalDocs.url          https://swagger.io/resources/open-api/
 
@@ -70,7 +74,7 @@ func main() {
 	
 
 	app := gin.Default()
-	docs.SwaggerInfo.BasePath = "/api/v1"
+	docs.SwaggerInfo.BasePath = ""
 	app.Use(gin.CustomRecovery(exception.ErrorHandler))
 
 	app.GET("/", func(c *gin.Context) {

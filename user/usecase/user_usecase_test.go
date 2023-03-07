@@ -21,7 +21,6 @@ func TestUserUC_Create(t *testing.T) {
 	
 	mockUserRepo := new(mocks.UserRepository)
 	mockUser := domain.UserReq{
-		Id:        "97391bbb-a48f-48e2-a166-db669e6377fc",
 		Name:      "Jo Sauer",
 		Username:  "Aracely_Simonis",
 		Password:  "12345678",

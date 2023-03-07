@@ -6,3 +6,6 @@ run:
 
 gen-swagger:
 	swag init -g cmd/main.go
+
+test:
+	go test -v ./...

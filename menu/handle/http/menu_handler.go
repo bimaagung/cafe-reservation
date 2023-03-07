@@ -30,15 +30,16 @@ func (controller *Menu) Route(app *gin.Engine) {
 
 // AddMenu godoc
 // @Schemes
+// @Security ApiKeyAuth
 // @Description add menu
 // @Tags Menu
 // @Accept json
 // @Produce json
-// @Param   Name  formData     string     true  "name menu"       example(Cappucino)
-// @Param   Price  formData     int     true  "price menu"       example(15000)
-// @Param   Stock  formData     int     true  "count stock menu"       example(10)
-// @Param Image formData file true "Upload cover image menu"
-// @Success 200 {object} domain.MenuRes
+// @Param   name  formData     string     true  "name menu"       example(Cappucino)
+// @Param   price  formData     int     true  "price menu"       example(15000)
+// @Param   stock  formData     int     true  "count stock menu"       example(10)
+// @Param image formData file true "Upload cover image menu"
+// @Success 200 {object} response.SuccessRes{data=domain.MenuRes}
 // @Router /api/menu [post]
 func (controller *Menu) Insert(c *gin.Context) {
 	var request domain.MenuReq
@@ -81,13 +82,14 @@ func (controller *Menu) Insert(c *gin.Context) {
 
 // DeleteMenu godoc
 // @Schemes
+// @Security ApiKeyAuth
 // @Description delete menu
 // @Tags Menu
 // @Accept json
 // @Produce json
-// @Param id   path int true "Menu ID"
-// @Success 200 {object} response.SuccessRes{Status=string, Message=string} "desc"
-// @Router /api/menu [delete]
+// @Param id   path string true "Menu ID"
+// @Success 200 {object} response.SuccessRes{status=string,message=string}
+// @Router /api/menu/{id} [delete]
 func (controller *Menu) Delete(c *gin.Context) {
 	id := c.Param("id")
 
@@ -106,6 +108,14 @@ func (controller *Menu) Delete(c *gin.Context) {
 	})
 }
 
+// GetListMenu godoc
+// @Schemes
+// @Description get list menu
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.SuccessRes{data=[]domain.MenuRes}
+// @Router /api/menu [get]
 func (controller *Menu) GetList(c *gin.Context) {
 
 	result, err := controller.MenuUseCase.GetList(c)
@@ -124,6 +134,15 @@ func (controller *Menu) GetList(c *gin.Context) {
 	})
 }
 
+// GetByIdMenu godoc
+// @Schemes
+// @Description get menu by id
+// @Tags Menu
+// @Accept json
+// @Produce json
+// @Param id   path string true "Menu ID"
+// @Success 200 {object} response.SuccessRes{data=domain.MenuRes}
+// @Router /api/menu/{id} [get]
 func (controller *Menu) GetById(c *gin.Context) {
 	 id := c.Param("id")
 
@@ -146,17 +165,18 @@ func (controller *Menu) GetById(c *gin.Context) {
 
 // UpdateMenu godoc
 // @Schemes
+// @Security ApiKeyAuth
 // @Description update menu
 // @Tags Menu
 // @Accept json
 // @Produce json
-// @Param id   path int true "Menu ID"
-// @Param   Name  formData     string     true  "name menu"       example(Cappucino)
-// @Param   Price  formData     int     true  "price menu"       example(15000)
-// @Param   Stock  formData     int     true  "count stock menu"       example(10)
-// @Param Image formData file true "Upload cover image menu"
-// @Success 200 {object} domain.MenuRes
-// @Router /api/menu [put]
+// @Param id   path string true "Menu ID"
+// @Param   name  formData     string     true  "name menu"       example(Cappucino)
+// @Param   price  formData     int     true  "price menu"       example(15000)
+// @Param   stock  formData     int     true  "count stock menu"       example(10)
+// @Param image formData file true "Upload cover image menu"
+// @Success 200 {object} response.SuccessRes{data=domain.MenuRes}
+// @Router /api/menu/{id} [put]
 func (controller *Menu) Update(c *gin.Context) {
 	var request domain.MenuReq
 	id := c.Param("id")
@@ -164,8 +184,9 @@ func (controller *Menu) Update(c *gin.Context) {
 	if err := c.Bind(&request); err != nil {
 		c.JSON(400, response.ErrorRes{
 			Status: "fail",
-			Message: err.Error(),
+			Message: "error response",
 		})
+		return
 	}
 
 	file, _ := c.FormFile("image")

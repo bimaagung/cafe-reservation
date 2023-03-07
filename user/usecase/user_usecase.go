@@ -10,9 +10,11 @@ import (
 	tokenmanager "github.com/bimaagung/cafe-reservation/utils/token_manager"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
+var id string = uuid.New().String()
 
 func NewUserUC(userRepository domain.UserRepository) domain.UserUseCase {
 	return &userUseCaseImpl {
@@ -38,7 +40,7 @@ func (useCase *userUseCaseImpl) Create(ctx context.Context, request *domain.User
 	}
 	
 	user := domain.User{
-		Id: request.Id,
+		Id: id,
 		Name: request.Name,
 		Username: request.Username,
 		Password: string(hashPassword),
@@ -63,7 +65,7 @@ func (useCase *userUseCaseImpl) Create(ctx context.Context, request *domain.User
 
 	//Generate Token
 	claims := jwt.MapClaims{
-		"id": request.Id,
+		"id": id,
 		"name": request.Name,
 		"username": request.Username,
 		"iat": time.Now().Unix(),
@@ -78,7 +80,7 @@ func (useCase *userUseCaseImpl) Create(ctx context.Context, request *domain.User
 	}
 
 	response = domain.UserRes{
-		Id: request.Id,
+		Id: id,
 		Name: request.Name,
 		Username: request.Username,
 		Token: token,

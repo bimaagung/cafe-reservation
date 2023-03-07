@@ -21,7 +21,7 @@ definitions:
         example: 10/10/2022 11:13:00
         type: string
       url:
-        example: '{url}/image.jpg'
+        example: http://127.0.0.1:9000/menu/64068897-1182718.png
         type: string
     required:
     - name
@@ -29,12 +29,36 @@ definitions:
     - stock
     - url
     type: object
+  domain.UserReq:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      retype_password:
+        type: string
+      username:
+        type: string
+    type: object
+  domain.UserRes:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      token:
+        type: string
+      username:
+        type: string
+    type: object
   response.SuccessRes:
     properties:
       data: {}
       message:
+        example: success
         type: string
       status:
+        example: ok
         type: string
     type: object
 host: localhost:3000
@@ -51,30 +75,50 @@ info:
   title: Cafe Reservation API
   version: "1.0"
 paths:
-  /api/menu:
-    delete:
+  /api/auth/register:
+    post:
       consumes:
       - application/json
-      description: delete menu
+      description: register a new user
       parameters:
-      - description: Menu ID
-        in: path
-        name: id
+      - description: the input account user
+        in: body
+        name: request
         required: true
-        type: integer
+        schema:
+          $ref: '#/definitions/domain.UserReq'
       produces:
       - application/json
       responses:
         "200":
-          description: desc
+          description: OK
           schema:
             allOf:
             - $ref: '#/definitions/response.SuccessRes'
             - properties:
-                ' Message':
-                  type: string
-                Status:
-                  type: string
+                data:
+                  $ref: '#/definitions/domain.UserRes'
+              type: object
+      tags:
+      - Auth
+  /api/menu:
+    get:
+      consumes:
+      - application/json
+      description: get list menu
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessRes'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.MenuRes'
+                  type: array
               type: object
       tags:
       - Menu
@@ -86,24 +130,24 @@ paths:
       - description: name menu
         example: Cappucino
         in: formData
-        name: Name
+        name: name
         required: true
         type: string
       - description: price menu
         example: 15000
         in: formData
-        name: Price
+        name: price
         required: true
         type: integer
       - description: count stock menu
         example: 10
         in: formData
-        name: Stock
+        name: stock
         required: true
         type: integer
       - description: Upload cover image menu
         in: formData
-        name: Image
+        name: image
         required: true
         type: file
       produces:
@@ -112,7 +156,67 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.MenuRes'
+            allOf:
+            - $ref: '#/definitions/response.SuccessRes'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.MenuRes'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Menu
+  /api/menu/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete menu
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessRes'
+            - properties:
+                message:
+                  type: string
+                status:
+                  type: string
+              type: object
+      security:
+      - ApiKeyAuth: []
+      tags:
+      - Menu
+    get:
+      consumes:
+      - application/json
+      description: get menu by id
+      parameters:
+      - description: Menu ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.SuccessRes'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.MenuRes'
+              type: object
       tags:
       - Menu
     put:
@@ -124,28 +228,28 @@ paths:
         in: path
         name: id
         required: true
-        type: integer
+        type: string
       - description: name menu
         example: Cappucino
         in: formData
-        name: Name
+        name: name
         required: true
         type: string
       - description: price menu
         example: 15000
         in: formData
-        name: Price
+        name: price
         required: true
         type: integer
       - description: count stock menu
         example: 10
         in: formData
-        name: Stock
+        name: stock
         required: true
         type: integer
       - description: Upload cover image menu
         in: formData
-        name: Image
+        name: image
         required: true
         type: file
       produces:
@@ -154,7 +258,19 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/domain.MenuRes'
+            allOf:
+            - $ref: '#/definitions/response.SuccessRes'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.MenuRes'
+              type: object
+      security:
+      - ApiKeyAuth: []
       tags:
       - Menu
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
